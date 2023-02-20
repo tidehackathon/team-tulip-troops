@@ -2,3 +2,6 @@ fastapi
 pydantic
 uvicorn
 python-dotenv
+requests
+lxml
+elasticsearch

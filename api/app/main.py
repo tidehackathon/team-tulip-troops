@@ -1,9 +1,18 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import health
+from app.routers import health, analyze
 
-app = FastAPI()
+app = FastAPI(
+    title="Hackathon NATO Tide",
+    description='description',
+    version="0.0.1",
+    terms_of_service="https://www.nato.int/",
+    license_info={
+        "name": "All rights reserved",
+        "url": "https://www.nato.int/",
+    }
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -14,4 +23,6 @@ app.add_middleware(
 )
 
 
+
+app.include_router(analyze.router, tags=['Analyze'], prefix='/analyze')
 app.include_router(health.router, tags=['Health'], prefix='/health')
