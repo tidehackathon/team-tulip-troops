@@ -9,16 +9,16 @@ matplotlib
 seaborn
 nltk
 wordcloud
-spacy
 babel
 numpy
+datasets
 
 --extra-index-url https://download.pytorch.org/whl/cu116
 torch==1.13.1
 
 ## For NLI + scraping
-google-search
-google
+googlesearch-python
+lxml
 bs4
 requests
 sentence_transformers
