@@ -1,0 +1,17 @@
+<div class="mat-app-background">
+  <mat-toolbar color="primary">
+    <button mat-icon-button (click)="home()">
+      <mat-icon>spa</mat-icon>
+    </button>
+    <span>Tulip troops</span>
+    <span class="spacer"></span>
+    <button mat-icon-button>
+      <mat-icon>favorite</mat-icon>
+    </button>
+  </mat-toolbar>
+  
+  <mat-progress-bar mode="indeterminate" color="accent" *ngIf="isLoading"></mat-progress-bar>
+  
+  <router-outlet></router-outlet>
+</div>
+

@@ -1,0 +1,14 @@
+<div class="container">
+    <div class="input-container">
+        <form class="form" (ngSubmit)="onSubmit()">
+            <mat-form-field class="width-500">
+                <mat-label>URL</mat-label>
+                <input type="email" matInput [formControl]="articalFormControl" placeholder="Enter article URL">
+                <mat-error *ngIf="articalFormControl.hasError('required')">
+                    Article URL is <strong>required</strong>
+                </mat-error>
+            </mat-form-field>
+            <button mat-flat-button type="submit" color="accent" class="submit-button">Analyse</button>
+        </form>
+    </div>
+</div>
