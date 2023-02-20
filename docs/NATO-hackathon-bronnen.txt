@@ -1,0 +1,44 @@
+Mogelijk richtingen:
+- Content-based, met supervised learning, evt. transformers (BERT?). Gebaseerd op text inhoud.
+- Context-based, gebaseerd op bronnen en kennis over context. Hier is ChatGPT bijvoorbeeld sterk in. GPT-3 of BLOOM?
+- Graph-based, gebaseerd op hoe een bericht zich verspreid over social media.
+- Image-based, manipulatie van afbeeldingen herkennen
+- Scraping-based, Google doorzoeken op onderwerp van bericht, resultaten vergelijken en bronnen beoordelen. Manier om data te verrijken?
+
+Of natuurlijk: combinatie van bovenstaande!
+
+###
+
+Actiepunten:
+- Werkwijzen beoordelen (papers)
+- Databronnen beoordelen en klaarzetten
+- Kansrijke modelling pipelines lokaal aan de praat krijgen
+- Hardware mogelijkheden verkennen en regelen
+
+###
+
+Papers:
+https://dl.acm.org/doi/10.1145/3472619?sid=SCITRUS
+https://paperswithcode.com/paper/fake-news-detection-on-social-media-using
+https://paperswithcode.com/paper/fighting-fake-news-image-splice-detection-via
+
+Code:
+https://www.kaggle.com/code/abrafey/fake-news-transformers/notebook
+https://github.com/manideep2510/siamese-BERT-fake-news-detection-LIAR
+
+Datasets:
+https://www.kaggle.com/competitions/fake-news/data
+https://www.kaggle.com/datasets/rchitic17/real-or-fake
+https://github.com/KaiDMML/FakeNewsNet
+https://github.com/Arko98/TALLIP-FakeNews-Dataset
+https://paperswithcode.com/dataset/fnc-1
+https://paperswithcode.com/dataset/some-like-it-hoax
+https://paperswithcode.com/dataset/liar
+http://tiny.cc/p1s2qy
+
+Groot overzicht van datasets:
+https://data.4tu.nl/articles/dataset/Repository_of_fake_news_detection_datasets/14151755
+	- https://github.com/rpitrust/fakenewsdata1
+	- https://figshare.com/articles/PHEME_rumour_scheme_dataset_journalism_use_case/2068650/2
+	- https://github.com/compsocial/CREDBANK-data
+	- https://github.com/sheffieldnlp/naacl2018-fever

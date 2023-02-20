@@ -1,0 +1,21 @@
+---
+Opdracht
+---
+
+SME: COL Mariusz
+
+Content identificeren en herkennen obv criteria van de opdrachtgever
+Herkennen van woorden, paragrafen of artikelen en classificeren als desinformatie
+
+
+---
+Plan van aanpak
+---
+
+Input: een bewering (titel of samenvatting van artikel, met auteur)
+
+1. Verzamel top n query resultaten (google search API) 
+2. Vergelijk inhoud claim met inhoud resultaten (evt samengevat): bevestiging, ontkrachting, of ongerelateerd. Mogelijk zelf met eigen data een model finetunen hiervoor. 
+3. Stel betrouwbaarheid van bronnen vast
+4. Andere metrics berekenen zoals sentiment
+5. Visualiseer de resultaten in dashboard

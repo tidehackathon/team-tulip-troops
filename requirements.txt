@@ -1,0 +1,29 @@
+## For kaggle fake news experiment
+jupyterlab
+ipython
+pandas
+transformers
+accelerate
+scikit-learn
+matplotlib
+seaborn
+nltk
+wordcloud
+spacy
+babel
+numpy
+
+--extra-index-url https://download.pytorch.org/whl/cu116
+torch==1.13.1
+
+## For NLI + scraping
+google-search
+google
+bs4
+requests
+sentence_transformers
+inference-tools
+fastapi
+pydantic
+uvicorn
+python-dotenv
