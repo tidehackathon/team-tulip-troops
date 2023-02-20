@@ -24,10 +24,10 @@ export class HomeComponent {
       this.api.analyseArticle(this.articalFormControl.value as string).subscribe(result => {
         console.log(result);
         
-  
         // navigate to result page
 
         // Loading false
+        this.state.setIsLoading(false);
       });
     }
   }

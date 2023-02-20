@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, HostBinding } from '@angular/core';
+import { FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
 import { StateService } from './services/state.service';
 
@@ -9,6 +10,9 @@ import { StateService } from './services/state.service';
 })
 export class AppComponent {
   isLoading: boolean = false;
+  toggleTheme = new FormControl(false);
+
+  @HostBinding('class') className = '';
 
   constructor(
     private state: StateService,
@@ -17,9 +21,16 @@ export class AppComponent {
     this.state.isLoading.subscribe(loading => {
       this.isLoading = loading;
     });
+
+    this.toggleTheme.valueChanges.subscribe((darkMode) => {
+      const darkClassName = 'darkMode';
+      this.className = darkMode ? darkClassName : '';
+    });
   }
 
   home(): void {
     this.router.navigateByUrl('/');
   }
+
+
 }
