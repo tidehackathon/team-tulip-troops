@@ -1,12 +1,12 @@
 from fastapi import APIRouter
 from pipeline.src import emotion
-
+from app import schemas
 
 router = APIRouter()
 
 
 @router.post('')
-def analyse(body: schema.GenericRequest):
+def analyse(body: schemas.GenericRequest):
     claim = body.data
 
     obj = {
