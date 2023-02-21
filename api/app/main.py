@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import health, analyse, articles
+from app.routers import health, analyse
 
 app = FastAPI(
     title="Hackathon NATO Tide",
