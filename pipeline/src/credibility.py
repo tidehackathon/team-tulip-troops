@@ -5,6 +5,8 @@ import os
 import unicodedata
 import pandas as pd
 import numpy as np
+import re
+from urllib.parse import urlparse
 
 import transformers
 import sentence_transformers
@@ -17,6 +19,12 @@ requests.packages.urllib3.disable_warnings()
 
 import get_evidences
 import summarization
+
+if torch.cuda.is_available():    
+    device = torch.device("cuda:0")
+    print('GPU used for claim checker: {}'.format(torch.cuda.get_device_name(0)))
+else:
+    device = torch.device("cpu")
 
 nli_model = None
 zero_shot_model = None
@@ -35,38 +43,68 @@ def investigate_tweet(input_jsonstr):
     input_dict.update(result)
     return json.dumps(input_dict)
 
-def investigate_claim(claim, datasource="google", model_type="nli", num_results=10):
+def investigate_claim(claim, datasource="google", model_type="nli", num_results=10, filter_opinions=True):
     """Investigates the claim based on evidence collected"""
 
-    evidences = collect_evidences(claim, datasource=datasource, num_results=num_results)
-    evidences = evidences.assign(text_input = evidences['text'])
-    use_summary = (evidences['summary'].str.len()>0) & (evidences['text'].str.len()>3000)
-    evidences.loc[use_summary,'text_input'] = evidences.loc[use_summary,'summary']
+    # Determine if claim or opinion
+    res, score = claim_or_opinion(claim)
 
-    evidences = evidences.loc[evidences.text_input.str.strip()!="",:]
+    if res == 'claim' or not filter_opinions:
+         # summarize claim if needed
+        if len(claim.split(' ')) > 50:
+            print('Summarizing claim for further processing.')
+            claim = summarization.summarize_text(claim, max_len=50)
 
-    if model_type == "nli":
-        evidences[['label','confidence']] = evidences.apply(run_nli_model,result_type='expand',axis=1, claim=claim)
-    elif model_type == "zero-shot":
-        evidences[['label','confidence']] = evidences.apply(run_zero_shot_model,result_type='expand',axis=1, claim=claim)
+        evidences = collect_evidences(claim, datasource=datasource, num_results=num_results)
+        evidences = evidences.assign(text_input = evidences['text'])
+        use_summary = (evidences['summary'].str.len()>0) & (evidences['text'].str.len()>3000)
+        evidences.loc[use_summary,'text_input'] = evidences.loc[use_summary,'summary']
+
+        evidences = evidences.loc[evidences.text_input.str.strip()!="",:]
+
+        if model_type == "nli":
+            evidences[['label','confidence']] = evidences.apply(run_nli_model,result_type='expand',axis=1, claim=claim)
+        elif model_type == "zero-shot":
+            evidences[['label','confidence']] = evidences.apply(run_zero_shot_model,result_type='expand',axis=1, claim=claim)
+        else:
+            raise NotImplementedError()
+
+        # get clean source name
+        cleaned_sources = ['.'.join(urlparse(s).netloc.split('.')[-2:-1]) for s in evidences.source.values]
+        evidences['cleaned_source'] = cleaned_sources
+
+        # determine source credibility
+        sources_cred = [cred[1] * -1 if 'uncredible' in cred[0] else cred[1] for cred in check_source_credibility(cleaned_sources)]
+        evidences['source_trust'] = sources_cred
+
+        # Remove sources that are too unreliable
+        unreliable_evidence = evidences[evidences['source_trust'] < -0.6]
+        evidences = evidences[evidences['source_trust'] > -0.6]
+
+        # Compute trust score
+        label_counts = evidences['label'].value_counts().to_dict()
+        label_weights = {'false': -1., 'neutral': -0.1, 'true': 1.}
+        score = sum([label_counts.get(l,0)*w for l,w in label_weights.items()])
+        norm_score = round((10 + score) / 20, 2)
+
+        # Re-add unreliable evidence for analysis
+        evidences = pd.concat([evidences, unreliable_evidence])
+        evidences['used_as_evidence'] = evidences['source_trust'] > -0.6
+
+        # Build results dict
+        evidences_dict = evidences.to_dict("records")
+        
+        return {
+            'credibility_score': norm_score,
+            'credibility_evidences': evidences_dict
+        }
     else:
-        raise NotImplementedError()
-    
-    label_counts = evidences['label'].value_counts().to_dict()
-    label_weights = {'false': -1., 'neutral': -0.1, 'true': 1.}
-    score = sum([label_counts.get(l,0)*w for l,w in label_weights.items()])
-    norm_score = round((10 + score) / 20, 2)
-
-    evidences_dict = evidences.to_dict("records")
-    
-    return {
-        'credibility_score': norm_score,
-        'credibility_evidences': evidences_dict
-    }
+        print(f'This is not a claim (confidence: {round(score,2)}). Not checking for factual correctness.')
+        return None # TODO wat returnen we voor de API?
 
 def collect_evidences(claim, datasource='google', num_results=10):
     evidences = load_evidences(claim, datasource)
-    if evidences is not False:
+    if evidences is False:
         if datasource=='google':
             evidences = fetch_evidences_google(claim, num_results=num_results)
         elif datasource=='elastic':
@@ -84,11 +122,13 @@ def fetch_evidences_google(claim, num_results=10):
     evidenceDF = evidenceDF.loc[evidenceDF['text'].str.strip()!=""]
     evidenceDF = evidenceDF.assign(summary = summarization.summarize_text(list(evidenceDF['text'].values)))
     return evidenceDF
+
 def fetch_evidence_from_link(link):
     evidence = get_evidences.get_relevant_text_from_webpage(link)
     evidence = flatten_evidence(evidence)
     evidence = clean_input(evidence)
     return evidence
+
 def fetch_evidences_elastic(claim):
     es = Elasticsearch(
         cloud_id=CLOUD_ID,
@@ -114,18 +154,50 @@ def load_evidences(claim, datasource):
         evidence = pd.read_csv(filename, sep ='\t')
         return evidence
     return False
+
 def save_evidences(claim, datasource, evidences):
     claimhash = hash_claim(claim)
     filename = f"../data/temp/{datasource:s}_{claimhash:s}.csv"
     evidences.to_csv(filename, sep ='\t')
+
 def hash_claim(claim):
     return hashlib.sha256(claim.encode()).hexdigest()
+
+
+# Models
+
+def claim_or_opinion(text):
+    global zero_shot_model
+    if zero_shot_model is None:
+        zero_shot_model = initialize_zero_shot()
+
+    res = zero_shot_model(text, ['claim', 'opinion'])
+    return res['labels'][0], res['scores'][0]
+
+def check_nation_affiliation(text, nation):
+    global zero_shot_model
+    if zero_shot_model is None:
+        zero_shot_model = initialize_zero_shot()
+
+    res = zero_shot_model(text, [f'{nation} affiliation', f'no {nation} affiliation'])
+    return res['labels'][0], res['scores'][0]
+
+def check_source_credibility(source_name):
+    global zero_shot_model
+    if zero_shot_model is None:
+        zero_shot_model = initialize_zero_shot()
+
+    res = zero_shot_model(source_name, ['uncredible source', 'credible source'])
+    if type(source_name) == str:
+        return res['labels'][0], res['scores'][0]
+    else:
+        return [(r['labels'][0], r['scores'][0]) for r in res]
 
 def run_zero_shot_model(row, claim, unsure_threshold=0.4):
     global zero_shot_model
 
     if zero_shot_model is None:
-        zero_shot_model = transformers.pipeline("zero-shot-classification", model="MoritzLaurer/DeBERTa-v3-large-mnli-fever-anli-ling-wanli")
+        zero_shot_model = initialize_zero_shot()
 
     if row.text_input:
         zeroshot_labels = [f"The following statement is True: {claim}",
@@ -140,11 +212,12 @@ def run_zero_shot_model(row, claim, unsure_threshold=0.4):
         return [label,confidence]
     else:
         return ['empty',0.0]
+
 def run_nli_model(row, claim, unsure_threshold=0.0):
     global nli_model
 
     if nli_model is None:
-        nli_model = sentence_transformers.CrossEncoder('MoritzLaurer/DeBERTa-v3-large-mnli-fever-anli-ling-wanli')
+        nli_model = initialize_nli()
 
     label_mapping = ['false', 'true', 'neutral']   # (['contradiction', 'entailment', 'neutral'])
     scores = nli_model.predict([(claim, row.text_input)])
@@ -153,17 +226,27 @@ def run_nli_model(row, claim, unsure_threshold=0.0):
     label = 'neutral' if confidence <= unsure_threshold else label_mapping[scores.argmax(axis=1)[0]]
     return [label,confidence]
 
+def initialize_zero_shot():
+    return transformers.pipeline("zero-shot-classification", model="MoritzLaurer/DeBERTa-v3-large-mnli-fever-anli-ling-wanli")
+
+def initialize_nli():
+    return sentence_transformers.CrossEncoder('MoritzLaurer/DeBERTa-v3-large-mnli-fever-anli-ling-wanli')
+
 # Pre/post-processing functions
+
 def clean_tweet(input_dict):
     tweetcontent = unicodedata.normalize('NFKD', input_dict['renderedContent']).encode('ascii', 'ignore').decode()
     input_dict['cleanRenderedContent'] = tweetcontent.replace("\n\n","").replace("\n",". ")
     return input_dict
+
 def clean_input(text):
     # Remove newline
     text = text.replace('\n', ' ')
     return text
+
 def split_to_sentences(text):
     return nltk.tokenize.sent_tokenize(text, language='english')
+
 def flatten_evidence(parsed_evidence):
     if type(parsed_evidence) == str:
         return parsed_evidence
