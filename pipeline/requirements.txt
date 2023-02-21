@@ -28,3 +28,4 @@ fastapi
 pydantic
 uvicorn
 python-dotenv
+elasticsearch
