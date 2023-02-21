@@ -5,7 +5,7 @@ router = APIRouter()
 
 
 @router.get('')
-def health(request: Request):
+def health(request: Request, user_agent: str = Header(default=None)):
     return {
         "status": "online",
         "server_time": datetime.now(),
