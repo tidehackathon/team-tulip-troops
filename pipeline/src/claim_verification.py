@@ -5,46 +5,85 @@ import pandas as pd
 import numpy as np
 from nltk.tokenize import sent_tokenize
 import torch
+import re
+from urllib.parse import urlparse
 
 requests.packages.urllib3.disable_warnings() 
 
 import get_evidences
 import summarization
 
-nli_model = CrossEncoder('MoritzLaurer/DeBERTa-v3-large-mnli-fever-anli-ling-wanli')
-zero_shot_model = pipeline("zero-shot-classification", model="MoritzLaurer/DeBERTa-v3-large-mnli-fever-anli-ling-wanli")
+if torch.cuda.is_available():    
+    device = torch.device("cuda:0")
+    print('GPU used for claim checker: {}'.format(torch.cuda.get_device_name(0)))
+else:
+    device = torch.device("cpu")
 
-def investigate_claim(claim, model_type='nli'):
+nli_model = CrossEncoder('MoritzLaurer/DeBERTa-v3-large-mnli-fever-anli-ling-wanli', device=device)
+zero_shot_model = pipeline("zero-shot-classification", model="MoritzLaurer/DeBERTa-v3-large-mnli-fever-anli-ling-wanli", device=device)
+
+def investigate_claim(claim, model_type='zero-shot', filter_opinions=True):
     
-    evidence = collect_evidence(claim, num_results=10)
-        
-    conclusions = []
-    confidences = []
-    for i, row in evidence.iterrows():
-        source, text, summary = row.source, row.text, row.summary
+    # Determine if claim or opinion
+    res, score = claim_or_opinion(claim)
+    if  res == 'claim' or not filter_opinions:
+        # summarize claim if needed
+        if len(claim.split(' ')) > 50:
+            print('Summarizing claim for further processing.')
+            claim = summarization.summarize_text(claim, max_len=50)
 
-        if len(summary) == 0:
-            print('Warning: no summary found for evidence.')
-            text_input = text
-        elif len(text) < 3000:
-            text_input = text
-        else:
-            text_input = summary
-        
-        if model_type == 'zero-shot':
-            label, confidence = apply_zero_shot_model(claim, text_input)
-        elif model_type == 'nli':
-            label, confidence = apply_nli_model(claim, text_input)
-        else:
-            raise ValueError('No valid model type specified.')
+        evidence = collect_evidence(claim, num_results=10)
             
-        conclusions += [label]
-        confidences += [confidence]
+        conclusions = []
+        confidences = []
+        # TODO vectorize this
+        for i, row in evidence.iterrows():
+            source, text, summary = row.source, row.text, row.summary
 
-    parse_conclusions(conclusions)
-    evidence['conclusion'] = conclusions
-    
-    return evidence
+            if len(summary) == 0:
+                print('Warning: no summary found for evidence.')
+                text_input = text
+            elif len(text) < 3000:
+                text_input = text
+            else:
+                text_input = summary
+            
+            if model_type == 'zero-shot':
+                label, confidence = apply_zero_shot_model(claim, text_input)
+            elif model_type == 'nli':
+                label, confidence = apply_nli_model(claim, text_input)
+            else:
+                raise ValueError('No valid model type specified.')
+                
+            conclusions += [label]
+            confidences += [confidence]
+
+        evidence['conclusion'] = conclusions
+
+        # get clean source name
+        cleaned_sources = ['.'.join(urlparse(s).netloc.split('.')[-2:-1]) for s in evidence.source.values]
+        evidence['cleaned_source'] = cleaned_sources
+
+        # determine source credibility
+        sources_cred = [cred[1] * -1 if 'uncredible' in cred[0] else cred[1] for cred in check_source_credibility(cleaned_sources)]
+        evidence['source_trust'] = sources_cred
+
+        # Remove sources that are too unreliable
+        unreliable_evidence = evidence[evidence['source_trust'] < -0.6]
+        evidence = evidence[evidence['source_trust'] > -0.6]
+
+        # filter evidence 
+        parse_conclusions(evidence['conclusion'].values, 
+                          evidence['source_trust'].values)
+
+        # Re-add unreliable evidence for analysis
+        evidence = pd.concat([evidence, unreliable_evidence])
+        evidence['used_as_evidence'] = evidence['source_trust'] > -0.6
+        
+        return evidence
+    else:
+        print(f'This is not a claim (confidence: {round(score,2)}). Not checking for factual correctness.')
+        return None
 
 def collect_evidence(claim, num_results):
     try:
@@ -71,14 +110,12 @@ def collect_evidence(claim, num_results):
         
     return evidence
 
-def parse_conclusions(conclusions):
+def parse_conclusions(conclusions, sources_cred):
     num_sources = len(conclusions)
     
-    false_score = conclusions.count('false')*-1
-    unsure_score = conclusions.count('neutral')*-0.1
-    true_score = conclusions.count('true')*1
-    
-    total_score = false_score + unsure_score + true_score
+    score_mapping = {'true':1, 'false':-1, 'neutral':-0.1}
+    conclusion_scores = [score_mapping[c] for c in conclusions]
+    total_score = sum(conclusion_scores)
     
     print(f'Conclusions: {conclusions}')
     
@@ -90,6 +127,21 @@ def parse_conclusions(conclusions):
     return normalized_score
 
 # Models
+
+def claim_or_opinion(text):
+    res = zero_shot_model(text, ['claim', 'opinion'])
+    return res['labels'][0], res['scores'][0]
+
+def check_nation_affiliation(text, nation):
+    res = zero_shot_model(text, [f'{nation} affiliation', f'no {nation} affiliation'])
+    return res['labels'][0], res['scores'][0]
+
+def check_source_credibility(source_name):
+    res = zero_shot_model(source_name, ['uncredible source', 'credible source'])
+    if type(source_name) == str:
+        return res['labels'][0], res['scores'][0]
+    else:
+        return [(r['labels'][0], r['scores'][0]) for r in res]
 
 def apply_zero_shot_model(claim, text):
     global zero_shot_model
@@ -144,10 +196,10 @@ def flatten_evidence(parsed_evidence):
 ## File related functions
 
 def save_evidence(evidence, claim):
-    claim = claim.replace(' ', '').strip()
+    claim = re.sub('[\W_]+', '', claim)
     pd.DataFrame(evidence).to_csv(f"../data/temp/{claim}.csv", sep ='\t')
     
 def load_evidence(claim):
-    claim = claim.replace(' ', '').strip()
+    claim = re.sub('[\W_]+', '', claim)
     evidence = pd.read_csv(f"../data/temp/{claim}.csv", sep ='\t')
     return evidence
