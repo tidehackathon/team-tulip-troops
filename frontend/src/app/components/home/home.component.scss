@@ -24,6 +24,22 @@
   margin-top: 24px;
 }
 
+.done {
+    border-bottom: 5px solid green;
+}
+
+.not-done {
+    opacity: 0.5;
+}
+
+.checkbox {
+    color: green;
+}
+
+.mini-spinner {
+    display: inline-block;
+}
+
 .loader-spinner {
   position: absolute;
   top: 50%;
