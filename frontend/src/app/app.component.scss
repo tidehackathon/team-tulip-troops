@@ -1,8 +1,13 @@
 .flex {
     height: 100vh;
+    width: 100vw;
     display: flex;
     flex: 1;
     flex-direction: column;
     justify-items: center;
     align-items: center;
+}
+
+mat-toolbar {
+    min-height: 64px;
 }

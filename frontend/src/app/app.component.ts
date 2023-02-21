@@ -10,9 +10,9 @@ import { StateService } from './services/state.service';
 })
 export class AppComponent {
   isLoading: boolean = false;
-  toggleTheme = new FormControl(false);
+  toggleTheme = new FormControl(true);
 
-  @HostBinding('class') className = '';
+  @HostBinding('class') className = 'darkMode';
 
   constructor(
     private state: StateService,

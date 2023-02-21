@@ -1,4 +1,34 @@
-<div class="container">
+<div *ngIf="isLoading" [@slideInOutLoader]>
+    <div class="loader-container">
+        <div class="loader-item">
+            <mat-icon>summarize</mat-icon> Summarizing <mat-spinner class="mini-spinner" diameter="16" color="accent"
+                *ngIf="!job1done"></mat-spinner> <mat-icon *ngIf="job1done" class="checkbox">check_box</mat-icon>
+        </div>
+        <div class="loader-item not-done" [class.not-done]="!job2">
+            <mat-icon>colorize</mat-icon> Extracting entities <mat-spinner class="mini-spinner" diameter="16"
+                color="accent" *ngIf="!job2done && job2"></mat-spinner> <mat-icon *ngIf="job2done"
+                class="checkbox">check_box</mat-icon>
+        </div>
+        <div class="loader-item not-done" [class.not-done]="!job3">
+            <mat-icon>sentiment_satisfied</mat-icon> Analyzing sentiment <mat-spinner class="mini-spinner" diameter="16"
+                color="accent" *ngIf="!job3done && job3"></mat-spinner> <mat-icon *ngIf="job3done"
+                class="checkbox">check_box</mat-icon>
+        </div>
+        <div class="loader-item not-done" [class.not-done]="!job4">
+            <mat-icon>travel_explore</mat-icon> News feed claim check <mat-spinner class="mini-spinner" diameter="16"
+                color="accent" *ngIf="!job4done && job4"></mat-spinner> <mat-icon *ngIf="job4done"
+                class="checkbox">check_box</mat-icon>
+        </div>
+        <div class="loader-item not-done" [class.not-done]="!job5">
+            <mat-icon>calculate</mat-icon> Calculation credibility <mat-spinner class="mini-spinner" diameter="16"
+                color="accent" *ngIf="!job5done && job5"></mat-spinner> <mat-icon *ngIf="job5done"
+                class="checkbox">check_box</mat-icon>
+        </div>
+    </div>
+    <mat-progress-bar mode="determinate" [value]="loaderValue" color="accent"></mat-progress-bar>
+</div>
+
+<div class="container" *ngIf="!isLoading" [@slideInOutInput]>
     <div class="input-container">
         <mat-card class="article-card">
             <mat-card-header>
