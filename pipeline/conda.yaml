@@ -1,0 +1,35 @@
+name: tuliptroops
+channels:
+  - defaults
+  - conda-forge
+  - pytorch
+  - pyg
+dependencies:
+  - python=3.8
+  - ipykernel
+  - pandas
+  - transformers
+  - accelerate
+  - scikit-learn
+  - matplotlib
+  - seaborn
+  - nltk
+  - wordcloud
+  - babel
+  - numpy
+  - pytorch=1.13.1
+  - googlesearch
+  - bs4
+  - requests
+  - sentence-transformers
+  - fastapi
+  - pydantic
+  - uvicorn
+  - python-dotenv
+  - cpuonly
+  - pyg
+  - lxml
+  - ca-certificates
+  - certifi
+  - openssl
+prefix: /home/daan/miniconda3/envs/tuliptroops
