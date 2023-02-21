@@ -1,0 +1,17 @@
+<div class="mat-app-background flex">
+  <mat-toolbar color="primary">
+    <button mat-icon-button (click)="home()">
+      <mat-icon>spa</mat-icon>
+    </button>
+    <span>DISInformation Analyzer</span>
+    <span class="spacer"></span>
+    <mat-slide-toggle [formControl]="toggleTheme">
+    </mat-slide-toggle>
+    <mat-icon>bedtime</mat-icon>
+  </mat-toolbar>
+  
+  <mat-progress-bar mode="indeterminate" color="accent" *ngIf="isLoading"></mat-progress-bar>
+  
+  <router-outlet></router-outlet>
+</div>
+

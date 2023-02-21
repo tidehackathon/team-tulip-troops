@@ -1,0 +1,24 @@
+<div class="container">
+    <div class="input-container">
+        <mat-card class="article-card">
+            <mat-card-header>
+                <mat-card-title>Analyse</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <form class="form">
+                    <mat-form-field class="input">
+                        <mat-label>Enter URL, #Hashtag, @Username or Tweet.</mat-label>
+                        <textarea matInput [formControl]="articalFormControl" rows="10"></textarea>
+                        <mat-error *ngIf="articalFormControl.hasError('required')">
+                            Input is <strong>required</strong>
+                        </mat-error>
+                    </mat-form-field>
+                </form>
+            </mat-card-content>
+            <mat-card-actions align="end">
+                <button mat-flat-button type="submit" color="accent" class="submit-button"
+                    (click)="onSubmit()">Analyse</button>
+            </mat-card-actions>
+        </mat-card>
+    </div>
+</div>
