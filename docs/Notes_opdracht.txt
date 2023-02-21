@@ -1,0 +1,29 @@
+# How do you want to use the app?
+First idea, Write chatbot for a chat-analyser
+Could realtime analyse 
+
+To many discussion during the developemnt
+Scientific dataset. We have not evaluates. No labeld
+You should do that
+
+1) Add extra datasets to label it
+
+Target: Clasifiy tweet misinformation/real (e.g 75%) with traceable reasoning
+Assuming all newspapers are factual. The dataset is factual data
+
+Evaluation Friday. 
+
+Proof of Work with validation dataset/confusion matrix
+
+Validate with provided data, if not works 
+
+Try to design factors, qualive approach
+Select those that are highly misinfo.
+
+In the presentation is a list of tools that they have found, that can be used. Lots of
+scienctific papers.
+
+Sequence diagram, Activity Diagram
+
+ 
+
