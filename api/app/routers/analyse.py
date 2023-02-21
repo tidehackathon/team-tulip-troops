@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from pipeline.src import emotion
+from pipeline.src import emotion, entities
 from app import schemas
 
 router = APIRouter()
@@ -10,19 +10,10 @@ def analyse(body: schemas.GenericRequest):
     claim = body.data
 
     obj = {
-        "id": "1234987128743",
-        "raw_text":"ChatGPT lists Trump, Elon Musk as controversial and worthy of special treatment, Biden and Bezos as not.",
+        "id": "111",
+        "raw_text":"",
         "summary": "",
-        "sentiment": [
-            {
-                "label":"POSITIVE",
-                "score": 0.98273
-            },
-            {
-                "label":"NEGATIVE",
-                "score": 0.98273
-            }
-        ],
+        "sentiment": {},
         "five_ws": {
             "Who":"ChatGPT",
             "What":"controversial",
@@ -48,15 +39,30 @@ def analyse(body: schemas.GenericRequest):
         "credibility_score": 0.7345
     }
 
+    obj['raw_text'] = claim
+    claim_obj = {"cleanRenderedContent": claim}
+    obj['sentiment'] = emotion.get_sentiment(claim_obj)
 
-    print(emotion.get_sentiment(claim))
+    print(entities.get_entities(claim_obj))
+    
+
+    # print(credibility.investigate_claim(claim, model_type='zero-shot'))
+
+    # print(entities.get_entities())
+
+
+    # obj['sentiment'] = emotion.get_sentiment(claim)
+    
+
+    
+
     
     # EXECUTE ANALYZER
 
 
     # INSERT ANALYZER RESULTS IN DB
 
-    return body
+    return obj
 
 
 

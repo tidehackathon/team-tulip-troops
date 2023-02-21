@@ -1,14 +1,14 @@
+import unicodedata
 import transformers
 import json
-from emotion import clean_data
 
 tokenizer = transformers.AutoTokenizer.from_pretrained("Jean-Baptiste/roberta-large-ner-english")
 model = transformers.AutoModelForTokenClassification.from_pretrained("Jean-Baptiste/roberta-large-ner-english")
 nlp = transformers.pipeline('ner', model=model, tokenizer=tokenizer, aggregation_strategy="simple")
 
-def get_entities(input_jsonstr):
+def get_entities(input):
     global tokenizer, model, nlp
-    input_dict = json.loads(input_jsonstr)
+    input_dict = input
     if 'cleanRenderedContent' not in input_dict:
         input_dict = clean_data(input_dict)
     entities = []
@@ -22,6 +22,12 @@ def get_entities(input_jsonstr):
         })
     input_dict['entities'] = entities
     return json.dumps(input_dict)
+
+
+def clean_data(input_dict):
+    tweetcontent = unicodedata.normalize('NFKD', input_dict['renderedContent']).encode('ascii', 'ignore').decode()
+    input_dict['cleanRenderedContent'] = tweetcontent.replace("\n\n","").replace("\n",". ")
+    return input_dict
 
 def display_entities(input_jsonstr):
     input_dict = json.loads(input_jsonstr)
