@@ -18,6 +18,7 @@ torch==1.13.1
 
 ## For NLI + scraping
 googlesearch-python
+google-api-python-client
 lxml
 bs4
 requests

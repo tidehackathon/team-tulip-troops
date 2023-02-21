@@ -1,20 +1,41 @@
+# https://programmablesearchengine.google.com/controlpanel/overview?cx=018062583803202450038%3Aaxp8v-eokms
+# https://developers.google.com/custom-search/v1/introduction
+
 import time
 import urllib
+import os
+from dotenv import load_dotenv
 
 from googlesearch import search
+from googleapiclient.discovery import build
 import requests
 from bs4 import BeautifulSoup
 
+load_dotenv()
+
+GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
+GOOGLE_CSE_ID = os.getenv('GOOGLE_CSE_ID')
+
+google_service = build("customsearch", "v1", developerKey=GOOGLE_API_KEY)
 
 def get_top_k_results_from_google(text, k):
-    text = urllib.parse.quote_plus(text)
-    res = search(text)
-    res = [r for r in res if '.pdf' not in r and 'twitter.com' not in r and 'facebook.com' not in r]
+    res = google_service.cse().list(q=text, cx=GOOGLE_CSE_ID, num=k).execute()
+    res = [r['link'] for r in res['items'] if '.pdf' not in r['link'] and 'twitter.com' not in r['link'] and 'facebook.com' not in r['link'] and 'youtube' not in r['link']]
     if res:
         return res[:k]
     else:
         return []
+    return res
 
+# # old function below
+# def get_top_k_results_from_google(text, k):
+#     text = urllib.parse.quote_plus(text)
+#     res = search(text)
+#     res = [r for r in res if '.pdf' not in r and 'twitter.com' not in r and 'facebook.com' not in r]
+#     if res:
+#         return res[:k]
+#     else:
+#         return []
 
 def get_relevant_text_from_webpage(url_link):
     try:
