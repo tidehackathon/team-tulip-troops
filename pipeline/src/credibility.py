@@ -11,6 +11,8 @@ import sentence_transformers
 import nltk.tokenize
 import torch
 
+from elasticsearch import Elasticsearch
+
 requests.packages.urllib3.disable_warnings()
 
 import get_evidences
@@ -18,6 +20,12 @@ import summarization
 
 nli_model = None
 zero_shot_model = None
+
+# Found in the 'Manage this deployment' page
+CLOUD_ID = "3b7c7ef1ec744d898bf05ea60d28d2de:dXMtY2VudHJhbDEuZ2NwLmNsb3VkLmVzLmlvJDVmNWNkY2UyOTFlMjQ3YWE5YjhmMWZlNjgyM2Y2NTE4JDRjOTY5N2YzYmY2ZjQwY2I5MmU4NWNkY2UzNjRlZjU1"
+
+# Found in the 'Management' page under the section 'Security'
+API_KEY = "ZjNHMFRJWUJETGVSREluRXdLVnY6VGl1d3NPQjdSRWF5aU1aQVRFSkRnQQ=="
 
 def investigate_tweet(input_jsonstr):
     input_dict = json.loads(input_jsonstr)
@@ -82,7 +90,22 @@ def fetch_evidence_from_link(link):
     evidence = clean_input(evidence)
     return evidence
 def fetch_evidences_elastic(claim):
-    raise NotImplementedError()
+    es = Elasticsearch(
+        cloud_id=CLOUD_ID,
+        api_key=API_KEY,
+    )
+    resp = es.search(index="news_articles", query={"query_string": {"query": claim}})
+    evidences = []
+    for hit in resp['hits']['hits']:
+        evidences.append({
+            'source': hit["_source"]['news_paper'] + " - " + hit["_source"]['published'] + " - " + hit["_source"]['headlines']
+            'text': hit["_source"]['headlines'] + "\n\n" + hit["_source"]['articles']
+        })
+    evidenceDF = pd.DataFrame(evidences)
+    evidenceDF = evidenceDF.drop_duplicates('text')
+    evidenceDF = evidenceDF.loc[evidenceDF['text'].str.strip()!=""]
+    evidenceDF = evidenceDF.assign(summary = summarization.summarize_text(list(evidenceDF['text'].values)))
+    return evidenceDF
 
 def load_evidences(claim, datasource):
     claimhash = hash_claim(claim)
