@@ -7,17 +7,17 @@ classifier = transformers.pipeline("text-classification", model="j-hartmann/emot
 
 def clean_data(input_dict):
     tweetcontent = unicodedata.normalize('NFKD', input_dict['renderedContent']).encode('ascii', 'ignore').decode()
-    input['cleanRenderedContent'] = tweetcontent.replace("\n\n","").replace("\n",". ")
-    return input
+    input_dict['cleanRenderedContent'] = tweetcontent.replace("\n\n","").replace("\n",". ")
+    return input_dict
 
 def get_sentiment(input_jsonstr):
     global classifier
-    input = json.loads(input_jsonstr)
-    if 'cleanRenderedContent' not in input:
-        input = clean_data(input)
-    emotion = classifier(input['cleanRenderedContent'])
-    input['emotion'] = {e['label']: e['score'] for e in emotion[0]}
-    return json.dumps(input)
+    input_dict = json.loads(input_jsonstr)
+    if 'cleanRenderedContent' not in input_dict:
+        input_dict = clean_data(input_dict)
+    emotion = classifier(input_dict['cleanRenderedContent'])
+    input_dict['emotion'] = {e['label']: e['score'] for e in emotion[0]}
+    return json.dumps(input_dict)
 
 ################################
 # Example implement
