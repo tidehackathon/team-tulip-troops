@@ -1,4 +1,25 @@
-<div class="container">
+<div *ngIf="isLoading" [@slideInOutLoader]>
+    <div class="loader-container">
+        <div class="loader-item">
+            <mat-icon>summarize</mat-icon> Summarizing
+        </div>
+        <div class="loader-item">
+            <mat-icon>colorize</mat-icon> Extracting entities
+        </div>
+        <div class="loader-item">
+            <mat-icon>sentiment_satisfied</mat-icon> Analyzing sentiment
+        </div>
+        <div class="loader-item">
+            <mat-icon>travel_explore</mat-icon> News feed claim check
+        </div>
+        <div class="loader-item">
+            <mat-icon>calculate</mat-icon> Calculation credibility
+        </div>
+    </div>
+    <mat-progress-bar mode="determinate" [value]="loaderValue" color="accent"></mat-progress-bar>
+</div>
+
+<div class="container" *ngIf="!isLoading" [@slideInOutInput]>
     <div class="input-container">
         <mat-card class="article-card">
             <mat-card-header>
@@ -22,3 +43,5 @@
         </mat-card>
     </div>
 </div>
+
+<mat-spinner diameter="40" color="accent" *ngIf="isLoading" class="loader-spinner"></mat-spinner>
