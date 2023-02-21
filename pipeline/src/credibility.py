@@ -98,8 +98,8 @@ def fetch_evidences_elastic(claim):
     evidences = []
     for hit in resp['hits']['hits']:
         evidences.append({
-            'source': hit["_source"]['news_paper'] + " - " + hit["_source"]['published'] + " - " + hit["_source"]['headlines']
-            'text': hit["_source"]['headlines'] + "\n\n" + hit["_source"]['articles']
+            'source': hit["_source"]['news_paper'] + " - " + hit["_source"]['published'] + " - " + hit["_source"]['headlines'],
+            'text': hit["_source"]['headlines'] + "\n\n" + hit["_source"]['articles'],
         })
     evidenceDF = pd.DataFrame(evidences)
     evidenceDF = evidenceDF.drop_duplicates('text')
