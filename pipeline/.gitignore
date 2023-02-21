@@ -1,6 +1,7 @@
 *venv-tulip-troops*
 *venv-team-tulip*
 */.ipynb_checkpoints/*
+*.ipynb_checkpoints*
 __pycache__
 venv/
 .env

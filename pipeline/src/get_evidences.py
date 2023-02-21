@@ -17,7 +17,12 @@ def get_top_k_results_from_google(text, k):
 
 
 def get_relevant_text_from_webpage(url_link):
-    request = requests.get(url_link, verify=False, timeout=20)
+    try:
+        request = requests.get(url_link, verify=False, timeout=20)
+    except Exception as e:
+        print(f'Webscrape warning, failed for url {url_link}: {e}')
+        return '', url_link
+
     # time.sleep(1)
     Soup = BeautifulSoup(request.text, 'lxml')
     if 'hindi news' in Soup.text.lower() or 'hindi samachar' in Soup.text.lower() or '/download' in request.url :
