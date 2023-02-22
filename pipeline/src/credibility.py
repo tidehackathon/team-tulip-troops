@@ -60,7 +60,7 @@ def investigate_claim(claim, datasource="google", model_type="zero-shot", num_re
     # Determine if claim or opinion
     res, claim_or_opinion_score = claim_or_opinion(claim)
 
-    if res == 'claim' or not filter_opinions:
+    if res != 'opinion' or not filter_opinions:
          # summarize claim if needed
         if len(claim.split(' ')) > 50:
             print('Summarizing claim for further processing.')
@@ -217,7 +217,8 @@ def claim_or_opinion(text):
     if zero_shot_model is None:
         zero_shot_model = initialize_zero_shot()
 
-    res = zero_shot_model(text, ['claim', 'opinion'])
+    res = zero_shot_model(text, ['statement', 'claim', 'opinion'])
+    print(res)
     return res['labels'][0], res['scores'][0]
 
 def check_nation_affiliation(text, nation):
