@@ -132,14 +132,17 @@ def collect_evidences(claim, datasource='google', num_results=10):
         evidences = evidences.assign(summary = summarization.summarize_text(list(evidences['text'].values),max_len=128))
         save_evidences(claim, datasource, evidences)
     return evidences
+
 def fetch_evidences_google(claim, num_results=10):
     links = get_evidences.get_top_k_results_from_google(claim, k=num_results)
     return pd.DataFrame(list(map(fetch_evidence_from_link,links)))
+
 def fetch_evidence_from_link(link):
     evidence = get_evidences.get_relevant_text_from_webpage(link)
     evidence = flatten_evidence(evidence)
     evidence = clean_input(evidence)
     return {'source':link, 'text': evidence, 'texthash': hashlib.md5(evidence.encode()).hexdigest()}
+
 def fetch_evidences_elastic(claim, num_results=10):
     es = Elasticsearch(
         cloud_id=CLOUD_ID,
