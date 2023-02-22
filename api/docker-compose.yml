@@ -1,0 +1,28 @@
+---
+    version: "3.7"
+    services:
+      tulip:
+        image: tulip
+        ports:
+          - "8000:8000"
+        restart: unless-stopped
+      swag:
+        image: ghcr.io/linuxserver/swag
+        container_name: swag
+        cap_add:
+          - NET_ADMIN
+        environment:
+          - PUID=1000
+          - PGID=1000
+          - TZ=Europe/Amsterdam
+          - URL=nickkrempel.nl
+          - SUBDOMAINS=tulip,
+          - VALIDATION=http
+          - ONLY_SUBDOMAINS=true
+        volumes:
+          - ./config/default:/config/nginx/site-confs/default
+          - ./config/ssl.conf:/config/nginx/ssl.conf
+        ports:
+          - 443:443
+          - 80:80
+        restart: unless-stopped
