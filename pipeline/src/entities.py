@@ -21,7 +21,7 @@ def get_entities(input):
             'end': int(e['end']),
         })
     input_dict['entities'] = entities
-    return input_dict
+    return json.loads(json.dumps(input_dict))
 
 
 def clean_data(input_dict):
