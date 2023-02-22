@@ -55,6 +55,9 @@ By utilizing a REST API, the application is highly interoperable and can be easi
 
 Overall, the application architecture is designed to be highly scalable and provide a reliable and flexible solution for processing and analyzing large amounts of natural language data.
 
+## Activity Diagram
+![](/docs/activity_diagram.png)
+
 ## Open API Specification for Interoperability
 ![](/docs/open_api.png)
 The backend is implemented using a REST API conforming to the Open API Specification for maximum interoperability.
