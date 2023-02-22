@@ -1,7 +1,7 @@
 ---
     version: "3.7"
     services:
-      parquet:
+      tulip:
         image: tulip
         ports:
           - "5000:5000"
