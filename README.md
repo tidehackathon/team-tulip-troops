@@ -58,6 +58,8 @@ Overall, the application architecture is designed to be highly scalable and prov
 ## Open API Specification for Interoperability
 ![](/docs/open_api.png)
 The backend is implemented using a REST API conforming to the Open API Specification for maximum interoperability.
+![](/docs/response.png)
+This is a response object from the service analyse (REST API) which can be easily integrated into other information systems.
 
 # Research
 
