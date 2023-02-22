@@ -8,7 +8,6 @@ Team members:
 - Gerben Rook
 - Nicolaas Krempel
 - Rik Kleine
-- (Erik Horjus)
 
 # Results
 Classifying content as misinformation is very important to counter the online onslaught of fake news working to undermine the healthy functioning of democracies. Several approaches have been proposed, such as classifying the text based on writing style, or using graph-based methods to determine fake content based on the spread through social media. We propose a more evidence-based method. Looking beyond the recent hype of ChatGPT, it has become apparent that Large Language Models (LLM) are capable of amazing feats. Many trivial human tasks such as comparing text are now also possible using AI. Therefore, we decided to further explore this technology for its ability to verify any given claim for its credibility, based on objective textual evidence.
@@ -43,6 +42,13 @@ The result of our model pipeline is stored in ElasticSearch and visualized in th
 
 TODO iets zeggen over dashboard en screenshots tonen
 
+## Architecture
+
+# Overall architecture
+![](/docs/overall_architecture.png)
+
+# Open API Specification for Interoperability
+![](/docs/openapispec.png)
 
 # Research
 
