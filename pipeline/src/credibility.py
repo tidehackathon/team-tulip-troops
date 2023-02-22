@@ -53,7 +53,7 @@ def investigate_tweet(input_jsonstr):
     input_dict.update(result)
     return json.dumps(input_dict)
 
-def investigate_claim(claim, datasource="google", model_type="nli", num_results=10, filter_opinions=True):
+def investigate_claim(claim, datasource="google", model_type="zero-shot", num_results=10, filter_opinions=True):
     start_time = time.time()
     """Investigates the claim based on evidence collected"""
 
@@ -115,7 +115,7 @@ def investigate_claim(claim, datasource="google", model_type="nli", num_results=
             'credibility_evidences': evidences_dict
         }
     else:
-        print(f'This is not a claim (confidence: {round(score,2)}). Not checking for factual correctness.')
+        print(f'This is not a claim (confidence: {round(claim_or_opinion_score,2)}). Not checking for factual correctness.')
         return {
             'claim_or_opinion_score': claim_or_opinion_score,
             'credibility_score': 0.0,
@@ -133,7 +133,7 @@ def collect_evidences(claim, datasource='google', num_results=10):
             raise NotImplementedError()
         evidences = evidences.drop_duplicates('text')
         evidences = evidences.loc[evidences['text'].str.strip()!=""]
-        evidences = evidences.assign(summary = summarization.summarize_text(list(evidences['text'].values),max_len=192))
+        evidences = evidences.assign(summary = summarization.summarize_text(list(evidences['text'].values),max_len=128))
         save_evidences(claim, datasource, evidences)
     return evidences
 def fetch_evidences_google(claim, num_results=10):
@@ -168,8 +168,8 @@ def fetch_evidences_elastic(claim, num_results=10):
 
 def load_evidences(claim, datasource):
     claimhash = hash_claim(claim)
-    print(os.getcwd())
     filename = f"./pipeline/data/temp/{datasource:s}_{claimhash:s}.csv"
+    os.makedirs(os.path.dirname(filename),exist_ok=True)
     if os.path.isfile(filename):
         evidence = pd.read_csv(filename, sep ='\t')
         return evidence
@@ -178,6 +178,7 @@ def load_evidences(claim, datasource):
 def save_evidences(claim, datasource, evidences):
     claimhash = hash_claim(claim)
     filename = f"./pipeline/data/temp/{datasource:s}_{claimhash:s}.csv"
+    os.makedirs(os.path.dirname(filename),exist_ok=True)
     evidences.to_csv(filename, sep ='\t')
 
 def hash_claim(claim):

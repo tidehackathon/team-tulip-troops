@@ -43,6 +43,8 @@ export class HomeComponent {
   job4: boolean = false;
   job5: boolean = false;
   job6: boolean = false;
+  job7: boolean = false;
+  job8: boolean = false;
 
   job1done: boolean = false;
   job2done: boolean = false;
@@ -50,6 +52,8 @@ export class HomeComponent {
   job4done: boolean = false;
   job5done: boolean = false;
   job6done: boolean = false;
+  job7done: boolean = false;
+  job8done: boolean = false;
 
   constructor(
     private api: ApiService,
@@ -76,23 +80,36 @@ export class HomeComponent {
   startLoader(): void {
     const subscription = this.int.subscribe(() => {
       this.loaderValue = this.loaderValue + 0.1;
-      if (this.loaderValue > 20) {
+      if (this.loaderValue > 12.5) {
         this.job1done = true;
         this.job2 = true;
       }
-      if (this.loaderValue > 40) {
+      if (this.loaderValue > 25) {
         this.job2done = true;
         this.job3 = true;
       }
-      if (this.loaderValue > 60) {
+      if (this.loaderValue > 37.7) {
         this.job3done = true;
         this.job4 = true;
       }
-      if (this.loaderValue > 80) {
+      if (this.loaderValue > 50) {
         this.job4done = true;
         this.job5 = true;
       }
+      if (this.loaderValue > 62.5) {
+        this.job5done = true;
+        this.job6 = true;
+      }
+      if (this.loaderValue > 75) {
+        this.job6done = true;
+        this.job7 = true;
+      }
+      if (this.loaderValue > 87.5) {
+        this.job7done = true;
+        this.job8 = true;
+      }
       if (this.loaderValue > 100) {
+        this.job8done = true;
         this.resetLoader();
         subscription.unsubscribe();
         this.router.navigateByUrl('/result');

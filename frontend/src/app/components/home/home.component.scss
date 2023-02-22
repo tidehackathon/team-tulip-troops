@@ -13,11 +13,16 @@
 
 .loader-container {
   display: flex;
+  flex-direction: column;
   height: 0px;
   width: 90%;
   margin: 0 auto;
-  justify-content: space-between;
-  z-index: -1;
+//   justify-content: space-between;
+  align-items: center;
+}
+
+.left {
+    align-items: start;
 }
 
 .loader-item {
@@ -29,7 +34,7 @@
 }
 
 .not-done {
-    opacity: 0.5;
+    opacity: 0.4;
 }
 
 .checkbox {
