@@ -17,7 +17,7 @@ def get_sentiment(input):
         input_dict = clean_data(input_dict)
     emotion = classifier(input_dict['cleanRenderedContent'])
     input_dict['emotion'] = {e['label']: e['score'] for e in emotion[0]}
-    return json.dumps(input_dict)
+    return input_dict
 
 ################################
 # Example implement
