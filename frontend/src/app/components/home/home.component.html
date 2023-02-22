@@ -1,28 +1,46 @@
 <div *ngIf="isLoading" [@slideInOutLoader]>
     <div class="loader-container">
-        <div class="loader-item">
-            <mat-icon>summarize</mat-icon> Summarizing <mat-spinner class="mini-spinner" diameter="16" color="accent"
-                *ngIf="!job1done"></mat-spinner> <mat-icon *ngIf="job1done" class="checkbox">check_box</mat-icon>
-        </div>
-        <div class="loader-item not-done" [class.not-done]="!job2">
-            <mat-icon>colorize</mat-icon> Extracting entities <mat-spinner class="mini-spinner" diameter="16"
-                color="accent" *ngIf="!job2done && job2"></mat-spinner> <mat-icon *ngIf="job2done"
-                class="checkbox">check_box</mat-icon>
-        </div>
-        <div class="loader-item not-done" [class.not-done]="!job3">
-            <mat-icon>sentiment_satisfied</mat-icon> Analyzing sentiment <mat-spinner class="mini-spinner" diameter="16"
-                color="accent" *ngIf="!job3done && job3"></mat-spinner> <mat-icon *ngIf="job3done"
-                class="checkbox">check_box</mat-icon>
-        </div>
-        <div class="loader-item not-done" [class.not-done]="!job4">
-            <mat-icon>travel_explore</mat-icon> News feed claim check <mat-spinner class="mini-spinner" diameter="16"
-                color="accent" *ngIf="!job4done && job4"></mat-spinner> <mat-icon *ngIf="job4done"
-                class="checkbox">check_box</mat-icon>
-        </div>
-        <div class="loader-item not-done" [class.not-done]="!job5">
-            <mat-icon>calculate</mat-icon> Calculation credibility <mat-spinner class="mini-spinner" diameter="16"
-                color="accent" *ngIf="!job5done && job5"></mat-spinner> <mat-icon *ngIf="job5done"
-                class="checkbox">check_box</mat-icon>
+        <div class="left">
+            <div class="loader-item">
+                <mat-icon>question_answer</mat-icon> Claim or opinion? <mat-spinner class="mini-spinner" diameter="16"
+                    color="accent" *ngIf="!job1done"></mat-spinner> <mat-icon *ngIf="job1done"
+                    class="checkbox">check_box</mat-icon>
+            </div>
+            <div class="loader-item not-done" [class.not-done]="!job2">
+                <mat-icon>sentiment_satisfied</mat-icon> Analyzing sentiment <mat-spinner class="mini-spinner"
+                    diameter="16" color="accent" *ngIf="!job2done && job2"></mat-spinner> <mat-icon *ngIf="job2done"
+                    class="checkbox">check_box</mat-icon>
+            </div>
+            <div class="loader-item not-done" [class.not-done]="!job3">
+                <mat-icon>colorize</mat-icon> Extracting entities <mat-spinner class="mini-spinner" diameter="16"
+                    color="accent" *ngIf="!job3done && job3"></mat-spinner> <mat-icon *ngIf="job3done"
+                    class="checkbox">check_box</mat-icon>
+            </div>
+            <div class="loader-item not-done" [class.not-done]="!job4">
+                <mat-icon>summarize</mat-icon> Summarizing claim <mat-spinner class="mini-spinner" diameter="16"
+                    color="accent" *ngIf="!job4done && job4"></mat-spinner> <mat-icon *ngIf="job4done"
+                    class="checkbox">check_box</mat-icon>
+            </div>
+            <div class="loader-item not-done" [class.not-done]="!job5">
+                <mat-icon>travel_explore</mat-icon> Collecting evidence <mat-spinner class="mini-spinner" diameter="16"
+                    color="accent" *ngIf="!job5done && job5"></mat-spinner> <mat-icon *ngIf="job5done"
+                    class="checkbox">check_box</mat-icon>
+            </div>
+            <div class="loader-item not-done" [class.not-done]="!job6">
+                <mat-icon>compare</mat-icon> Comparing claim with evidence <mat-spinner class="mini-spinner"
+                    diameter="16" color="accent" *ngIf="!job6done && job6"></mat-spinner> <mat-icon *ngIf="job6done"
+                    class="checkbox">check_box</mat-icon>
+            </div>
+            <div class="loader-item not-done" [class.not-done]="!job7">
+                <mat-icon>policy</mat-icon> Checking source reliability <mat-spinner class="mini-spinner" diameter="16"
+                    color="accent" *ngIf="!job7done && job7"></mat-spinner> <mat-icon *ngIf="job7done"
+                    class="checkbox">check_box</mat-icon>
+            </div>
+            <div class="loader-item not-done" [class.not-done]="!job8">
+                <mat-icon>calculate</mat-icon> Calculating credibilty score <mat-spinner class="mini-spinner"
+                    diameter="16" color="accent" *ngIf="!job8done && job8"></mat-spinner> <mat-icon *ngIf="job8done"
+                    class="checkbox">check_box</mat-icon>
+            </div>
         </div>
     </div>
     <mat-progress-bar mode="determinate" [value]="loaderValue" color="accent"></mat-progress-bar>
