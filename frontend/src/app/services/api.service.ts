@@ -22,12 +22,11 @@ export class ApiService {
     return { headers };
   }
   
-  analyseArticle(url: string): Observable<any> {
+  analyseArticle(claim: string): Observable<any> {
     const payload = {
-      url
+      data: claim
     }
-    const h = this.getHeaders();
-    return this.http.post(`${this.baseUrl}/analyze`, payload, h);
+    return this.http.post(`${this.baseUrl}/analyse`, payload);
   }
 
   kibana(): Observable<any> {
