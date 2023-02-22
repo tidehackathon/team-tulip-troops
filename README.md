@@ -57,6 +57,7 @@ Overall, the application architecture is designed to be highly scalable and prov
 
 ## Activity Diagram
 ![](/docs/activity_diagram.png)
+Credibility activity diagram
 
 ## Open API Specification for Interoperability
 ![](/docs/open_api.png)
