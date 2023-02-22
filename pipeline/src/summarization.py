@@ -19,7 +19,6 @@ def summarize_text(text, max_len=128):
     done = False
     trunc_len = 700
     while (not done) and (trunc_len > 300):
-        print(trunc_len)
         try:
             text = truncate_text(text, trunc_len)
             summarized_text = summarizer(text, min_length=min(10, len(text)), max_length=max_len)
