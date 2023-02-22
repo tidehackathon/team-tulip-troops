@@ -150,6 +150,7 @@ def fetch_evidences_elastic(claim):
 def load_evidences(claim, datasource):
     claimhash = hash_claim(claim)
     filename = f"../data/temp/{datasource:s}_{claimhash:s}.csv"
+    os.makedirs(os.path.dirname(filename),exist_ok=True)
     if os.path.isfile(filename):
         evidence = pd.read_csv(filename, sep ='\t')
         return evidence
@@ -158,6 +159,7 @@ def load_evidences(claim, datasource):
 def save_evidences(claim, datasource, evidences):
     claimhash = hash_claim(claim)
     filename = f"../data/temp/{datasource:s}_{claimhash:s}.csv"
+    os.makedirs(os.path.dirname(filename),exist_ok=True)
     evidences.to_csv(filename, sep ='\t')
 
 def hash_claim(claim):
