@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from pipeline.src import emotion, entities
+from pipeline.src import emotion, entities, credibility
 from app import schemas
 
 router = APIRouter()
@@ -46,7 +46,7 @@ def analyse(body: schemas.GenericRequest):
     print(entities.get_entities(claim_obj))
     
 
-    # print(credibility.investigate_claim(claim, model_type='zero-shot'))
+    print(credibility.investigate_claim(claim, model_type='zero-shot'))
 
     # print(entities.get_entities())
 
