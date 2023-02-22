@@ -23,8 +23,12 @@ try:
     from . import get_evidences
     from . import summarization
 except ImportError:
-    import get_evidences
-    import summarization
+    try:
+        import get_evidences
+        import summarization
+    except ImportError:
+        from pipeline.src import get_evidences
+        from pipeline.src import summarization
 
 if torch.cuda.is_available():    
     device = torch.device("cuda:0")
