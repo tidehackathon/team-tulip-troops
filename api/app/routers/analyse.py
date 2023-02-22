@@ -1,8 +1,42 @@
+import uuid
 from fastapi import APIRouter
 from pipeline.src import emotion, entities, credibility
 from app import schemas
+from elasticsearch import Elasticsearch, helpers
+from datetime import datetime
 
 router = APIRouter()
+
+
+def insert_data(index_name, data):
+    # Found in the 'Manage this deployment' page
+    CLOUD_ID = "3b7c7ef1ec744d898bf05ea60d28d2de:dXMtY2VudHJhbDEuZ2NwLmNsb3VkLmVzLmlvJDVmNWNkY2UyOTFlMjQ3YWE5YjhmMWZlNjgyM2Y2NTE4JDRjOTY5N2YzYmY2ZjQwY2I5MmU4NWNkY2UzNjRlZjU1"
+
+    # Found in the 'Management' page under the section 'Security'
+    API_KEY = "ZjNHMFRJWUJETGVSREluRXdLVnY6VGl1d3NPQjdSRWF5aU1aQVRFSkRnQQ=="
+
+    # Create the client instance
+    es = Elasticsearch(
+        cloud_id=CLOUD_ID,
+        api_key=API_KEY,
+    )
+    actions = []
+
+    
+    for row in data:
+        doc = {
+            "_index": index_name,
+            "_id": uuid.uuid4(),
+            "_source": row
+        }
+        actions.append(doc)
+
+
+    try:
+        helpers.bulk(es, actions)
+    except helpers.BulkIndexError as bie:
+        for error in bie.errors:
+            print(error)
 
 
 @router.post('')
@@ -10,57 +44,26 @@ def analyse(body: schemas.GenericRequest):
     claim = body.data
 
     obj = {
-        "id": "111",
+        "id": uuid.uuid4(),
+        "datetime": datetime.utcnow(),
         "raw_text":"",
-        "summary": "",
         "sentiment": {},
-        "five_ws": {
-            "Who":"ChatGPT",
-            "What":"controversial",
-            "When":"",
-            "Where":"",
-            "Why":""
-        },
-        "search_confidence": 0.7877,
-        "entities": [
-            {
-                "text":"Google Inc.",
-                "label": "ORG"
-            },
-            {
-                "text":"Elon Musk",
-                "label": "PERSON"
-            },
-            {
-                "text":"California",
-                "label": "GPE"
-            }
-        ],
-        "credibility_score": 0.7345
+        "entities": [],
+        "credibility_score": 0
     }
 
     obj['raw_text'] = claim
     claim_obj = {"cleanRenderedContent": claim}
+
     obj['sentiment'] = emotion.get_sentiment(claim_obj)
 
-    print(entities.get_entities(claim_obj))
+    obj['entities'] = entities.get_entities(claim_obj)
     
+    obj['credibility'] = credibility.investigate_claim(claim, model_type='zero-shot')
 
-    print(credibility.investigate_claim(claim, model_type='zero-shot'))
+    obj['credibility_score'] = obj['credibility']['credibility_score']
 
-    # print(entities.get_entities())
-
-
-    # obj['sentiment'] = emotion.get_sentiment(claim)
-    
-
-    
-
-    
-    # EXECUTE ANALYZER
-
-
-    # INSERT ANALYZER RESULTS IN DB
+    insert_data('claims1', [obj])
 
     return obj
 
@@ -70,54 +73,9 @@ def analyse(body: schemas.GenericRequest):
 
 @router.get('')
 def analyse():
-    data = [
-        {
-            "id": "1234987128743",
-            "raw_text":"ChatGPT lists Trump, Elon Musk as controversial and worthy of special treatment, Biden and Bezos as not.",
-            "summary": "",
-            "sentiment": [
-                {
-                    "label":"POSITIVE",
-                    "score": 0.98273
-                },
-                {
-                    "label":"NEGATIVE",
-                    "score": 0.98273
-                }
-            ],
-            "five_ws": {
-                "Who":"ChatGPT",
-                "What":"controversial",
-                "When":"",
-                "Where":"",
-                "Why":""
-            },
-            "search_confidence": 0.7877,
-            "entities": [
-                {
-                    "text":"Google Inc.",
-                    "label": "ORG"
-                },
-                {
-                    "text":"Elon Musk",
-                    "label": "PERSON"
-                },
-                {
-                    "text":"California",
-                    "label": "GPE"
-                }
-            ],
-            "score": 0.7345
-        }
-    ]
-
-
-    return data
+    return {}
 
 
 @router.get('/{id}')
 def analyse(id: str, body: schemas.GenericRequest):
-
-
-
     return {}
