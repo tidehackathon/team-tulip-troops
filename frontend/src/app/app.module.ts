@@ -9,12 +9,16 @@ import { HomeComponent } from './components/home/home.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ResultComponent } from './components/result/result.component';
 import { HttpClientModule } from '@angular/common/http';
+import { KibanaComponent } from './components/kibana/kibana.component';
+import { ResultDetailsComponent } from './components/result-details/result-details.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     HomeComponent,
-    ResultComponent
+    ResultComponent,
+    KibanaComponent,
+    ResultDetailsComponent
   ],
   imports: [
     BrowserModule,

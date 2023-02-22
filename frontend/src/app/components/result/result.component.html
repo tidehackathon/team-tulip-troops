@@ -1,1 +1,15 @@
-<iframe id="kibana" style="width: 100%; height: calc(100vh - 68px);" frameborder="0" allowFullScreen="true"></iframe>
+<table mat-table [dataSource]="claims" class="mat-elevation-z8 results">
+
+    <ng-container matColumnDef="position">
+        <th mat-header-cell *matHeaderCellDef> Claim </th>
+        <td mat-cell *matCellDef="let claim"> {{claim.claim}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef> Score </th>
+        <td mat-cell *matCellDef="let claim"> {{claim.score}} </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="columns"></tr>
+    <tr mat-row *matRowDef="let row; columns: columns;"></tr>
+</table>

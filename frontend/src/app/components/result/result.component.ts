@@ -1,5 +1,5 @@
-import { Component, ElementRef, OnInit } from '@angular/core';
-import { environment } from 'src/environments/environment';
+import { Component, OnInit } from '@angular/core';
+import { ApiService } from 'src/app/services/api.service';
 
 @Component({
   selector: 'app-result',
@@ -7,14 +7,18 @@ import { environment } from 'src/environments/environment';
   styleUrls: ['./result.component.scss'],
 })
 export class ResultComponent implements OnInit {
-  url: string = environment.kibanaUrl;
+
+  claims = [];
+  columns = ['claim', 'score'];
 
   constructor(
-    private elementRef: ElementRef
-    ) {}
+    private api: ApiService
+  ) {}
 
   ngOnInit(): void {
-    const iframe = this.elementRef.nativeElement.querySelector('#kibana');
-    iframe.src = this.url;
+    // this.api.getClaims().subscribe(claims => {
+    //   console.log(claims);
+    //   this.claims = claims;
+    // });
   }
 }

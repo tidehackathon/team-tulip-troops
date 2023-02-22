@@ -36,4 +36,8 @@ export class ApiService {
     }
     return this.http.post(`${environment.kibanaUrl}`, payload);
   }
+
+  getClaims(): Observable<any> {
+    return this.http.get(`${this.baseUrl}/claims`);
+  }
 }
