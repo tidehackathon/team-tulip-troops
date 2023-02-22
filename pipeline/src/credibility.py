@@ -17,8 +17,8 @@ from elasticsearch import Elasticsearch
 
 requests.packages.urllib3.disable_warnings()
 
-import get_evidences
-import summarization
+from . import get_evidences
+from . import summarization
 
 if torch.cuda.is_available():    
     device = torch.device("cuda:0")
