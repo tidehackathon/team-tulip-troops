@@ -7,7 +7,7 @@ import urllib
 import os
 from dotenv import load_dotenv
 
-from googlesearch import search
+# from googlesearch import search
 from googleapiclient.discovery import build
 import requests
 from bs4 import BeautifulSoup
@@ -20,7 +20,7 @@ GOOGLE_CSE_ID = os.getenv('GOOGLE_CSE_ID')
 google_service = build("customsearch", "v1", developerKey=GOOGLE_API_KEY)
 
 def get_top_k_results_from_google(text, k):
-    res = google_service.cse().list(q=text, cx=GOOGLE_CSE_ID, num=int(k*2)).execute()
+    res = google_service.cse().list(q=text, cx=GOOGLE_CSE_ID, num=min(10, k)).execute()
     res = [r['link'] for r in res['items'] if (
         '.pdf' not in r['link'] and 
         'twitter.com' not in r['link'] and 
