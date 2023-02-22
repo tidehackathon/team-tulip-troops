@@ -42,13 +42,22 @@ The result of our model pipeline is stored in ElasticSearch and visualized in th
 
 TODO iets zeggen over dashboard en screenshots tonen
 
-## Architecture
+# Architecture
 
-# Overall architecture
+## Overall architecture
 ![](/docs/overall_architecture.png)
 
-# Open API Specification for Interoperability
+The application architecture consists of several components that work together to provide a powerful and scalable solution. The frontend is built using Angular, a popular and widely used framework for building web applications. The frontend is responsible for displaying the data and providing an intuitive user interface for interacting with the application.
+
+The backend is implemented using a REST API conforming to the Open API Specification. This API is responsible for receiving requests from the frontend and other external systems, as well as triggering the Python AI Pipeline with the provided claim or Twitter message. The AI Pipeline uses Python to perform the necessary natural language processing tasks and produce the desired results. The results are then stored in ElasticSearch, a distributed search and analytics engine that provides a scalable and flexible datastore for the application.
+
+By utilizing a REST API, the application is highly interoperable and can be easily integrated with other systems. This allows for easy integration with external data sources or other applications that may need to interact with the data stored in ElasticSearch and the AI Pipeline.
+
+Overall, the application architecture is designed to be highly scalable and provide a reliable and flexible solution for processing and analyzing large amounts of natural language data.
+
+## Open API Specification for Interoperability
 ![](/docs/openapispec.png)
+The backend is implemented using a REST API conforming to the Open API Specification.
 
 # Research
 
