@@ -40,7 +40,7 @@ Finally, some additional information is extracted from the claim, such as entiti
 
 The result of our model pipeline is stored in ElasticSearch and visualized in the dashboard.
 
-TODO iets zeggen over dashboard en screenshots tonen
+![](/docs/dashboard.png)
 
 # Architecture
 
@@ -56,8 +56,10 @@ By utilizing a REST API, the application is highly interoperable and can be easi
 Overall, the application architecture is designed to be highly scalable and provide a reliable and flexible solution for processing and analyzing large amounts of natural language data.
 
 ## Open API Specification for Interoperability
-![](/docs/openapispec.png)
+![](/docs/open_api.png)
 The backend is implemented using a REST API conforming to the Open API Specification for maximum interoperability.
+![](/docs/response.png)
+This is a response object from the service analyse (REST API) which can be easily integrated into other information systems.
 
 # Research
 
