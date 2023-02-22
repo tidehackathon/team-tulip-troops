@@ -164,7 +164,6 @@ def fetch_evidences_elastic(claim, num_results=10):
 
 def load_evidences(claim, datasource):
     claimhash = hash_claim(claim)
-    print(os.getcwd())
     filename = f"./pipeline/data/temp/{datasource:s}_{claimhash:s}.csv"
     os.makedirs(os.path.dirname(filename),exist_ok=True)
     if os.path.isfile(filename):
