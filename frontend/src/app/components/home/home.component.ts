@@ -64,17 +64,14 @@ export class HomeComponent {
   onSubmit(): void {
     this.isLoading = !this.isLoading;
     this.startLoader();
-    // if (this.articalFormControl.valid) {
-    //   this.state.setIsLoading(true);
-    //   this.api.analyseArticle(this.articalFormControl.value as string).subscribe(result => {
-    //     console.log(result);
-        
-    //     // navigate to result page
+    if (this.articalFormControl.valid) {
+      this.api.analyseArticle(this.articalFormControl.value as string).subscribe(result => {
+        console.log(result);
+        this.isLoading = !this.isLoading;
+        // navigate to result page
 
-    //     // Loading false
-    //     this.state.setIsLoading(false);
-    //   });
-    // }
+      });
+    }
   }
 
   startLoader(): void {
@@ -112,7 +109,8 @@ export class HomeComponent {
         this.job8done = true;
         this.resetLoader();
         subscription.unsubscribe();
-        this.router.navigateByUrl('/result');
+        this.isLoading = !this.isLoading;
+        // this.router.navigateByUrl('/result');
       }
     });
   }

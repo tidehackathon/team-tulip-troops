@@ -28,11 +28,19 @@ def summarize_text(text, max_len=128):
             trunc_len -= 100
 
     if type(text) != str:
-        summarized_text = [txt['summary_text'] for txt in summarized_text]
+        result = []
+        for i, txt in enumerate(summarized_text):
+            if len(txt['summary_text']) > len(text[i]):
+                result.append(text[i])
+            else:
+                result.append(txt['summary_text'])
+        return result
     else:
-        summarized_text = summarized_text[0]['summary_text']
-        
-    return summarized_text
+        summary = summarized_text[0]['summary_text']
+        if len(summary) > len(text):
+            return text
+        else:
+            return summary
 
 def truncate_text(text, max_tokens):
     if type(text) == str:

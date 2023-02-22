@@ -85,10 +85,7 @@ def investigate_claim(claim, datasource="google", model_type="zero-shot", num_re
         def run_model(evidencedict):
             modelfn = run_nli_model if model_type == 'nli' else run_zero_shot_model
             return modelfn(evidencedict, claim=claim)
-        if not evidence_list:
-            evidences = pd.DataFrame([],columns=['source','text','texthash','summary','text_input','label','confidence'])
-        else:
-            evidences = pd.DataFrame(map(run_model, evidence_list))
+        evidences = pd.DataFrame(map(run_model, evidence_list))
 
         # get clean source name
         def get_clean_source(source):
@@ -273,7 +270,7 @@ def run_nli_model(evidence_dict, claim, unsure_threshold=0.0):
     label_mapping = ['false', 'true', 'neutral']   # (['contradiction', 'entailment', 'neutral'])
     scores = nli_model.predict([(claim, evidence_dict['text_input'])])
     
-    confidence = scores[scores.argmax(axis=1)[0]]
+    confidence = scores[0,scores.argmax(axis=1)[0]]
     label = 'neutral' if confidence <= unsure_threshold else label_mapping[scores.argmax(axis=1)[0]]
     result = {'label':label,'confidence':confidence}
     evidence_dict.update(result)
