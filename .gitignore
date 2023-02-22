@@ -3,3 +3,4 @@ venv-team-tulip
 __pycache__
 venv/
 .env
+*/temp/*
