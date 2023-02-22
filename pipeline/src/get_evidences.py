@@ -1,5 +1,6 @@
 # https://programmablesearchengine.google.com/controlpanel/overview?cx=018062583803202450038%3Aaxp8v-eokms
 # https://developers.google.com/custom-search/v1/introduction
+# https://console.cloud.google.com/ to get and manage API keys
 
 import time
 import urllib
