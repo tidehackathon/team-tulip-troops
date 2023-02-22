@@ -6,6 +6,8 @@ import unicodedata
 import pandas as pd
 import numpy as np
 import re
+import multiprocessing
+import time
 from urllib.parse import urlparse
 
 import transformers
@@ -17,8 +19,12 @@ from elasticsearch import Elasticsearch
 
 requests.packages.urllib3.disable_warnings()
 
-from . import get_evidences
-from . import summarization
+try:
+    from . import get_evidences
+    from . import summarization
+except ImportError:
+    import get_evidences
+    import summarization
 
 if torch.cuda.is_available():    
     device = torch.device("cuda:0")
@@ -44,10 +50,11 @@ def investigate_tweet(input_jsonstr):
     return json.dumps(input_dict)
 
 def investigate_claim(claim, datasource="google", model_type="nli", num_results=10, filter_opinions=True):
+    start_time = time.time()
     """Investigates the claim based on evidence collected"""
 
     # Determine if claim or opinion
-    res, score = claim_or_opinion(claim)
+    res, claim_or_opinion_score = claim_or_opinion(claim)
 
     if res == 'claim' or not filter_opinions:
          # summarize claim if needed
@@ -61,16 +68,20 @@ def investigate_claim(claim, datasource="google", model_type="nli", num_results=
         evidences.loc[use_summary,'text_input'] = evidences.loc[use_summary,'summary']
 
         evidences = evidences.loc[evidences.text_input.str.strip()!="",:]
-
-        if model_type == "nli":
-            evidences[['label','confidence']] = evidences.apply(run_nli_model,result_type='expand',axis=1, claim=claim)
-        elif model_type == "zero-shot":
-            evidences[['label','confidence']] = evidences.apply(run_zero_shot_model,result_type='expand',axis=1, claim=claim)
-        else:
-            raise NotImplementedError()
+        evidence_list = evidences.to_dict(orient="records")
+        
+        def run_model(evidencedict):
+            modelfn = run_nli_model if model_type == 'nli' else run_zero_shot_model
+            return modelfn(evidencedict, claim=claim)
+        evidences = pd.DataFrame(map(run_model, evidence_list))
 
         # get clean source name
-        cleaned_sources = ['.'.join(urlparse(s).netloc.split('.')[-2:-1]) for s in evidences.source.values]
+        def get_clean_source(source):
+            if source.startswith("http"):
+                return '.'.join(urlparse(source).netloc.split('.')[-2:-1])
+            elif " - " in source:
+                return source.split(' - ')[0]
+        cleaned_sources = list(map(get_clean_source,evidences.source.to_list()))
         evidences['cleaned_source'] = cleaned_sources
 
         # determine source credibility
@@ -81,7 +92,7 @@ def investigate_claim(claim, datasource="google", model_type="nli", num_results=
         unreliable_evidence = evidences[evidences['source_trust'] < -0.6]
         evidences = evidences[evidences['source_trust'] > -0.6]
 
-        # Compute trust score
+        # Compute credibility_score
         label_counts = evidences['label'].value_counts().to_dict()
         label_weights = {'false': -1., 'neutral': -0.1, 'true': 1.}
         score = sum([label_counts.get(l,0)*w for l,w in label_weights.items()])
@@ -95,12 +106,17 @@ def investigate_claim(claim, datasource="google", model_type="nli", num_results=
         evidences_dict = evidences.to_dict("records")
         
         return {
+            'claim_or_opinion_score': claim_or_opinion_score,
             'credibility_score': norm_score,
             'credibility_evidences': evidences_dict
         }
     else:
         print(f'This is not a claim (confidence: {round(score,2)}). Not checking for factual correctness.')
-        return None # TODO wat returnen we voor de API?
+        return {
+            'claim_or_opinion_score': claim_or_opinion_score,
+            'credibility_score': 0.0,
+            'credibility_evidences': [],
+        }
 
 def collect_evidences(claim, datasource='google', num_results=10):
     evidences = load_evidences(claim, datasource)
@@ -111,46 +127,44 @@ def collect_evidences(claim, datasource='google', num_results=10):
             evidences = fetch_evidences_elastic(claim, num_results=num_results)
         else:
             raise NotImplementedError()
+        evidences = evidences.drop_duplicates('text')
+        evidences = evidences.loc[evidences['text'].str.strip()!=""]
+        evidences = evidences.assign(summary = summarization.summarize_text(list(evidences['text'].values),max_len=192))
         save_evidences(claim, datasource, evidences)
     return evidences
-
 def fetch_evidences_google(claim, num_results=10):
     links = get_evidences.get_top_k_results_from_google(claim, k=num_results)
-    evidenceDF = pd.DataFrame(links,columns=['source'])
-    evidenceDF = evidenceDF.assign(text = evidenceDF['source'].apply(fetch_evidence_from_link))
-    evidenceDF = evidenceDF.drop_duplicates('text')
-    evidenceDF = evidenceDF.loc[evidenceDF['text'].str.strip()!=""]
-    evidenceDF = evidenceDF.assign(summary = summarization.summarize_text(list(evidenceDF['text'].values)))
-    return evidenceDF
-
+    return pd.DataFrame(list(map(fetch_evidence_from_link,links)))
 def fetch_evidence_from_link(link):
     evidence = get_evidences.get_relevant_text_from_webpage(link)
     evidence = flatten_evidence(evidence)
     evidence = clean_input(evidence)
-    return evidence
-
-def fetch_evidences_elastic(claim):
+    return {'source':link, 'text': evidence, 'texthash': hashlib.md5(evidence.encode()).hexdigest()}
+def fetch_evidences_elastic(claim, num_results=10):
     es = Elasticsearch(
         cloud_id=CLOUD_ID,
         api_key=API_KEY,
     )
-    resp = es.search(index="news_articles", query={"query_string": {"query": claim}})
-    evidences = []
-    for hit in resp['hits']['hits']:
-        evidences.append({
-            'source': hit["_source"]['news_paper'] + " - " + hit["_source"]['published'] + " - " + hit["_source"]['headlines'],
-            'text': hit["_source"]['headlines'] + "\n\n" + hit["_source"]['articles'],
-        })
-    evidenceDF = pd.DataFrame(evidences)
-    evidenceDF = evidenceDF.drop_duplicates('text')
-    evidenceDF = evidenceDF.loc[evidenceDF['text'].str.strip()!=""]
-    evidenceDF = evidenceDF.assign(summary = summarization.summarize_text(list(evidenceDF['text'].values)))
-    return evidenceDF
+    resp = es.search(index="news_articles", body={'query':{"match": {"articles": {"query": claim}}}})
+
+    hits = resp['hits']['hits']
+    if len(hits)>num_results:
+        hits = hits[:num_results]
+    def build_evidence(hit):
+        news_paper = " ".join(word.title() for word in hit["_source"]['news_paper'].split('_'))
+        text = (hit["_source"]['headlines'] + "\n\n" + hit["_source"]['articles']).strip()
+        return {
+            'source': news_paper + " - " + hit["_source"]['published'] + " - " + hit["_source"]['headlines'],
+            'text': text.replace("\n"," ").strip(),
+            'texthash': hashlib.md5(text.encode()).hexdigest()
+        }
+    evidences = list(map(build_evidence, hits))
+
+    return pd.DataFrame(evidences)
 
 def load_evidences(claim, datasource):
     claimhash = hash_claim(claim)
     filename = f"../data/temp/{datasource:s}_{claimhash:s}.csv"
-    os.makedirs(os.path.dirname(filename),exist_ok=True)
     if os.path.isfile(filename):
         evidence = pd.read_csv(filename, sep ='\t')
         return evidence
@@ -159,7 +173,6 @@ def load_evidences(claim, datasource):
 def save_evidences(claim, datasource, evidences):
     claimhash = hash_claim(claim)
     filename = f"../data/temp/{datasource:s}_{claimhash:s}.csv"
-    os.makedirs(os.path.dirname(filename),exist_ok=True)
     evidences.to_csv(filename, sep ='\t')
 
 def hash_claim(claim):
@@ -195,38 +208,42 @@ def check_source_credibility(source_name):
     else:
         return [(r['labels'][0], r['scores'][0]) for r in res]
 
-def run_zero_shot_model(row, claim, unsure_threshold=0.4):
+def run_zero_shot_model(evidence_dict, claim, unsure_threshold=0.4):
     global zero_shot_model
 
     if zero_shot_model is None:
         zero_shot_model = initialize_zero_shot()
 
-    if row.text_input:
+    if evidence_dict['text_input']:
         zeroshot_labels = [f"The following statement is True: {claim}",
                         f"Not enough information to verify the following statement: {claim}",
                         f"The following statement is False: {claim}"]
-        conclusion = zero_shot_model(row.text_input, candidate_labels=zeroshot_labels)
+        conclusion = zero_shot_model(evidence_dict['text_input'], candidate_labels=zeroshot_labels)
         parsed_conclusion = conclusion['labels'][0].split(' ')[4].lower().replace(':', '')
 
         confidence = conclusion['scores'][0]
         label = 'neutral' if confidence <= unsure_threshold else(
             parsed_conclusion if parsed_conclusion in ['true','false'] else 'neutral')
-        return [label,confidence]
+        result = {'label':label,'confidence':confidence}
     else:
-        return ['empty',0.0]
+        result = {'label':'empty','confidence':0.0}
+    evidence_dict.update(result)
+    return evidence_dict
 
-def run_nli_model(row, claim, unsure_threshold=0.0):
+def run_nli_model(evidence_dict, claim, unsure_threshold=0.0):
     global nli_model
 
     if nli_model is None:
         nli_model = initialize_nli()
 
     label_mapping = ['false', 'true', 'neutral']   # (['contradiction', 'entailment', 'neutral'])
-    scores = nli_model.predict([(claim, row.text_input)])
+    scores = nli_model.predict([(claim, evidence_dict['text_input'])])
     
     confidence = scores[scores.argmax(axis=1)[0]]
     label = 'neutral' if confidence <= unsure_threshold else label_mapping[scores.argmax(axis=1)[0]]
-    return [label,confidence]
+    result = {'label':label,'confidence':confidence}
+    evidence_dict.update(result)
+    return evidence_dict
 
 def initialize_zero_shot():
     return transformers.pipeline("zero-shot-classification", model="MoritzLaurer/DeBERTa-v3-large-mnli-fever-anli-ling-wanli")
