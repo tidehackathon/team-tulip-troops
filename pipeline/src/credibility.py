@@ -218,7 +218,6 @@ def claim_or_opinion(text):
         zero_shot_model = initialize_zero_shot()
 
     res = zero_shot_model(text, ['statement', 'claim', 'opinion'])
-    print(res)
     return res['labels'][0], res['scores'][0]
 
 def check_nation_affiliation(text, nation):
