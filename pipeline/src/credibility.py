@@ -23,8 +23,12 @@ try:
     from . import get_evidences
     from . import summarization
 except ImportError:
-    import get_evidences
-    import summarization
+    try:
+        import get_evidences
+        import summarization
+    except ImportError:
+        from pipeline.src import get_evidences
+        from pipeline.src import summarization
 
 if torch.cuda.is_available():    
     device = torch.device("cuda:0")
@@ -63,6 +67,14 @@ def investigate_claim(claim, datasource="google", model_type="zero-shot", num_re
             claim = summarization.summarize_text(claim, max_len=50)
 
         evidences = collect_evidences(claim, datasource=datasource, num_results=num_results)
+        if len(evidences)==0:
+            return {
+                'claim_or_opinion_score': claim_or_opinion_score,
+                'credibility_label': "Undecided",
+                'credibility_score': .5,
+                'credibility_evidences': []
+            }
+
         evidences = evidences.assign(text_input = evidences['text'])
         use_summary = (evidences['summary'].str.len()>0) & (evidences['text'].str.len()>3000)
         evidences.loc[use_summary,'text_input'] = evidences.loc[use_summary,'summary']
@@ -73,7 +85,10 @@ def investigate_claim(claim, datasource="google", model_type="zero-shot", num_re
         def run_model(evidencedict):
             modelfn = run_nli_model if model_type == 'nli' else run_zero_shot_model
             return modelfn(evidencedict, claim=claim)
-        evidences = pd.DataFrame(map(run_model, evidence_list))
+        if not evidence_list:
+            evidences = pd.DataFrame([],columns=['source','text','texthash','summary','text_input','label','confidence'])
+        else:
+            evidences = pd.DataFrame(map(run_model, evidence_list))
 
         # get clean source name
         def get_clean_source(source):
@@ -104,9 +119,16 @@ def investigate_claim(claim, datasource="google", model_type="zero-shot", num_re
 
         # Build results dict
         evidences_dict = evidences.to_dict("records")
+
+        credibility_label = "Undecided"
+        if norm_score >= .6:
+            credibility_label = "Verified"
+        elif norm_score <= .4:
+            credibility_label = "Contradicted"
         
         return {
             'claim_or_opinion_score': claim_or_opinion_score,
+            'credibility_label': credibility_label,
             'credibility_score': norm_score,
             'credibility_evidences': evidences_dict
         }
@@ -114,6 +136,7 @@ def investigate_claim(claim, datasource="google", model_type="zero-shot", num_re
         print(f'This is not a claim (confidence: {round(claim_or_opinion_score,2)}). Not checking for factual correctness.')
         return {
             'claim_or_opinion_score': claim_or_opinion_score,
+            'credibility_label': "Opinion",
             'credibility_score': 0.0,
             'credibility_evidences': [],
         }
@@ -125,6 +148,8 @@ def collect_evidences(claim, datasource='google', num_results=10):
             evidences = fetch_evidences_google(claim, num_results=num_results)
         elif datasource=='elastic':
             evidences = fetch_evidences_elastic(claim, num_results=num_results)
+        elif datasource=='empty':
+            evidences = pd.DataFrame([],columns=['source','text','texthash'],dtype=str)
         else:
             raise NotImplementedError()
         evidences = evidences.drop_duplicates('text')
@@ -135,6 +160,8 @@ def collect_evidences(claim, datasource='google', num_results=10):
 
 def fetch_evidences_google(claim, num_results=10):
     links = get_evidences.get_top_k_results_from_google(claim, k=num_results)
+    if not links:
+        return pd.DataFrame([],columns=['source','text','texthash'],dtype=str)
     return pd.DataFrame(list(map(fetch_evidence_from_link,links)))
 
 def fetch_evidence_from_link(link):
@@ -151,6 +178,8 @@ def fetch_evidences_elastic(claim, num_results=10):
     resp = es.search(index="news_articles", body={'query':{"match": {"articles": {"query": claim}}}})
 
     hits = resp['hits']['hits']
+    if not hits:
+        return pd.DataFrame([],columns=['source','text','texthash'],dtype=str)
     if len(hits)>num_results:
         hits = hits[:num_results]
     def build_evidence(hit):
