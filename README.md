@@ -136,84 +136,8 @@ Open-source: Both Elasticsearch and Kibana are open-source tools, which means th
 TODO
 
 ## Additional information
-
-### How to get this repo running
-1. Fetch the Google API-keys as mentioned below
-2. Create a virtual environment:
-```
-$ python3 -m venv venv
-```
-3. Activate the virtual environment:
-```
-$ pip install -r requirements.txt
-```
-4. Run FastAPI server for development
-```
-$ uvicorn app.main:app --host localhost --port 8000 --reload
-```
-5. Install nodejs version 14 or higher
-6. Install the Angular CLI version 15 or higher:
-```
-$ npm install -g @angular/cli
-```
-7. Navigate to the `frontend` folder
-8. Install the Node modules
-```
-$ npm install
-```
-9. Serve the frontend
-```
-$ ng serve
-```
-10. Go to http://localhost:4200
-
-### How to get the Google API-keys
-([Source](https://mixedanalytics.com/knowledge-base/import-google-serp-data-to-google-sheets/))
-
-1. While logged into your Google account, navigate to https://programmablesearchengine.google.com/controlpanel/all, and click Add
-2. You'll be prompted to configure your custom search engine. Give your Search Engine a name, and choose to search the entire web (unless you specifically want to limit your results to a subset of pages). Click Create.
-3. Your search engine has been created. Click Customize.
-4. Scroll down the page and optionally adjust any settings. Note the search engine ID as we'll need that soon.
-5. Navigate to the Custom Search JSON API page at https://developers.google.com/custom-search/v1/overview#api_key and click Get a Key.
-6. Choose an existing project, or create a new one, and click Next.
-7. Note and copy your API key, you'll need this along with your custom search engine ID.
-8. Create a file called `.env` in the `pipeline/src`-folder.
-9. Add the keys to this file as follows:
-```
-GOOGLE_API_KEY=<YOUR_API_KEY>
-GOOGLE_CSE_ID=<YOUR_SEARCH_ENGINE_ID>
-```
-
-### How to start with ElasticSearch/Kibana?
-1. Start the Free Trial (14 days) on https://www.elastic.co/
-2. Login
-3. Go to Integrations -> Python
-4. Right corner click "View deployment details"
-5. Copy Cloud ID and Create API key (replace those in .env)
-6. Go to Stack Management -> Saved Objects -> Import "kibana_export_dashboard.ndjson" 
-7. Start the FAST API and Angular Frontend
-
-### List of Acronyms
-
-- **DMO** Defense Material Organisation (NLD MoD)
-- **GNN** Graph Neural Networks
-- **JIVC** Joint IT Command (NLD MoD/DMO)
-- **KIXS** Knowledge Innovation eXperimentation & Simulation (NLD MoD/JIVC)
-- **LLM** Large Language Model (type of Neural Network; e.g. ChatGPT)
-
-### Terms & Definitions
-- **Angular** A popular and widely used framework for building web applications
-- **API** Application Programming Interface, a set of definitions, protocols and procedures for interacting with a piece of software from any other script/software.
-- **ChatGPT** An application developped by OpenAI. Essentially a chat-box with a (very) Large Language Model on the other side.
-- **DeBERTa** An improved version of BERT, a Large Language Model. BERT was developped by Google, DeBERTa by Microsoft.
-- **ElasticSearch** Elasticsearch is a database optimized for searching large volumes of text data in real-time.
-- **FAST API** A modern, fast (high-performance), web framework for building APIs according to the OpenAPI specifications.
-- **Hugging Face** A repository of pre-trained machine learning models of all kinds.
-- **OpenAPI Specification** A standard that defines a way to build APIs which allows both humans and computers to discover and understand the capabilities of the service without access to source code or documentation.
-- **Python** A popular general purpose programming language
-- **REST API** A web based API that returns its result after a HTTP request was made.
-- **Zero-shot Classification** The task of predicting a class of a given sample of text, where the the class was not seen by the model during training. Usualy achieved using LLMs.
-
+How to install this repo: [INSTALL.md](/INSTALL.md)
+List of Acronyms, Terms & Definitions: [REFERENCES.md](/REFERENCES.md)
 
 # Links
 
