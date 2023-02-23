@@ -45,10 +45,11 @@
                 <button mat-flat-button class="result-button" [disabled]="!resultReceived" (click)="toToDetails()">VIEW DETAILS</button>
             </div>
             <div class="loader-item">
-                <span *ngIf="allDone" class="score" [class.false]="credibility_label === 'Contradicted'"
-                      [class.true]="credibility_label === 'Verified'"
-                      [class.neutral]="credibility_label === 'Undecided'"
-                      [class.opinion]="credibility_label === 'Opinion'">{{ credibility_label }}</span>
+                <span *ngIf="allDone" class="score" 
+                      [class.red]="credibility_label == 'Contradicted'"
+                      [class.green]="credibility_label == 'Verified'"
+                      [class.neutral]="credibility_label == 'Undecided'"
+                      [class.opinion]="credibility_label == 'Opinion'">{{ credibility_label }}</span>
             </div>
         </div>
     </div>

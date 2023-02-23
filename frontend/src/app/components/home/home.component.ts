@@ -70,8 +70,8 @@ export class HomeComponent implements OnInit {
   }
 
   onSubmit(): void {
-    this.startLoader();
     if (this.articalFormControl.valid) {
+      this.startLoader();
       this.api.analyseArticle(this.articalFormControl.value as string).subscribe(result => {
         console.log(result);
         this.resultReceived = true;
