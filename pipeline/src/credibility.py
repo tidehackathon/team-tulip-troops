@@ -121,9 +121,9 @@ def investigate_claim(claim, datasource="google", model_type="zero-shot", num_re
         evidences_dict = evidences.to_dict("records")
 
         credibility_label = "Undecided"
-        if norm_score >= .6:
+        if norm_score >= .55:
             credibility_label = "Verified"
-        elif norm_score <= .4:
+        elif norm_score <= .45:
             credibility_label = "Contradicted"
         
         return {
