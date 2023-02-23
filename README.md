@@ -68,6 +68,10 @@ An important next step is to also determine the credibility of the evidence sour
 
 Finally, some additional information is extracted from the claim, such as entities and emotion. This is added to provide users with quick insights about the content of a claim.
 
+To validate our method, we selected a subset of the provided Twitter data and labelled tweets as being either true or false. Due to time constraints, the size of this dataset was limited to only 14. Nevertheless, the test results do give an initial indication of our method quality, with an accuracy score of <b>0.78</b>. The used dataset is provided below:
+
+![](/docs/test_set_screenshot.jpg)
+
 ### Open API Specification for Interoperability
 ![](/docs/open_api.png)
 The backend is implemented using a REST API conforming to the Open API Specification for maximum interoperability.
