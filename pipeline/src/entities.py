@@ -1,6 +1,7 @@
 import unicodedata
 import transformers
 import json
+import re
 
 tokenizer = transformers.AutoTokenizer.from_pretrained("Jean-Baptiste/roberta-large-ner-english")
 model = transformers.AutoModelForTokenClassification.from_pretrained("Jean-Baptiste/roberta-large-ner-english")
@@ -27,9 +28,17 @@ def get_entities(input):
 
 
 def clean_data(input_dict):
-    tweetcontent = unicodedata.normalize('NFKD', input_dict['renderedContent']).encode('ascii', 'ignore').decode()
-    input_dict['cleanRenderedContent'] = tweetcontent.replace("\n\n","").replace("\n",". ")
-    return input_dict
+    text = input_dict['renderedContent']
+    text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode()
+    text = text.replace('\n', ' ').lower()
+
+    # Remove urls, hashtags and user mentions
+    text = re.sub(r'\#', ' ', f' {text} ')
+    text = re.sub(r'\s\@\S+', ' ', f' {text} ')
+    text = re.sub(r'''(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))''', '', text)
+    text = re.sub(r'\s{2,}', ' ', text)
+
+    return text.strip().title()
 
 def display_entities(input_jsonstr):
     input_dict = json.loads(input_jsonstr)
