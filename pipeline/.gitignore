@@ -4,6 +4,6 @@
 *.ipynb_checkpoints*
 __pycache__
 venv/
-.env
+!data/tide_test_data.csv
 data
 .env
