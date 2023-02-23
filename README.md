@@ -42,7 +42,7 @@ After collecting the evidence, it is compared with the claim to judge whether it
 
 An important next step is to also determine the credibility of the evidence sources. If a claim is deemed True based on fake news media, this would of course undermine the outcome completely. Having considered white/blacklist methods, we eventually ended up also applying the LLM to this problem, using a zero-shot task defined as `['credible source', 'uncredible source']`. This model is applied to the domain name of the source URL, e.g. 'bbc' or 'infowars'. If a source is uncredible, and states that a claim is True, our model actually reverses the conclusion and gives a negative score.
 
-TODO screenshot van resultaat
+![](/docs/source.png)
 
 Additionally, a possible feature worth mentioning is assessing the country affiliation of a source. Although this is not included in the analysis pipeline, experiments with this concept have yielded impresive results. An example would be assessing whether a source is affiliated with a hostile nation, and changing the credibility score accordingly.
 
