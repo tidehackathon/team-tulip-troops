@@ -49,7 +49,7 @@ Finally, some additional information is extracted from the claim, such as entiti
 
 The result of our model pipeline is stored in ElasticSearch and visualized in the dashboard.
 
-![](/docs/dashboard.png)
+![](/docs/dashboard_es.png)
 
 ## Architecture
 
@@ -83,7 +83,7 @@ This is a response object from the service analyse (REST API) which can be easil
 
 ### Software / frameworks
 - Hugging Face
-- FastAPI (OpenAPI specs)
+- FastAPI (Open API specification)
 - ElasticSearch
 
 ### Explanation
