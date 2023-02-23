@@ -8,7 +8,8 @@
 - [x] Explain why Angular
 - [ ] Explain why which HuggingFace model
 - [ ] Team Stories
-- [ ] Additional Information
+- [x] Additional Information
+- [ ] Activity Diagram voorzien van filmpje
 
 
 ## Team description
@@ -20,9 +21,30 @@ Team members:
 - Nicolaas Krempel
 - Rik Kleine
 
-## Results
+## Architecture
+
+### Overall architecture
+
 Classifying content as disinformation is very important to counter the online onslaught of fake news working to undermine the healthy functioning of democracies. Several approaches have been proposed, such as classifying the text based on writing style, or using graph-based methods to determine fake content based on the spread through social media. We propose a more evidence-based method. Looking beyond the recent hype of ChatGPT, it has become apparent that Large Language Models (LLM) are capable of amazing feats. Many trivial human tasks such as comparing text are now also possible using AI. Therefore, we decided to further explore this technology for its ability to verify any given claim for its credibility, based on objective textual evidence.
 
+![](/docs/overall_architecture.png)
+
+The application architecture consists of several components that work together to provide a powerful and scalable solution. The frontend is built using Angular, a popular and widely used framework for building web applications. The frontend is responsible for displaying the data and providing an intuitive user interface for interacting with the application.
+
+The backend is implemented using a REST API conforming to the Open API Specification. This API is responsible for receiving requests from the frontend and other external systems, as well as triggering the Python AI Pipeline with the provided claim or Twitter message. The AI Pipeline uses Python to perform the necessary natural language processing tasks and produce the desired results. The results are then stored in ElasticSearch, a distributed search and analytics engine that provides a scalable and flexible datastore for the application.
+
+By utilizing a REST API, the application is highly interoperable and can be easily integrated with other systems. This allows for easy integration with external data sources or other applications that may need to interact with the data stored in ElasticSearch and the AI Pipeline.
+
+Overall, the application architecture is designed to be highly scalable and provide a reliable and flexible solution for processing and analyzing large amounts of natural language data.
+
+### Activity Diagram
+![](/docs/activity_diagram.png)
+Credibility activity diagram
+
+The result of our model pipeline is stored in ElasticSearch and visualized in the dashboard.
+![](/docs/dashboard_es.png)
+
+## Results
 More specifically, our solution leverages the power of LLMs to verify a claim based on evidence from open (internet) sources or an on-premise knowledge base. Using AI at every step, the first step checks whether a text contains a claim, then compares the claim to search query results, determines the source credibility, and finally returns a weighted credibility score. Moreover, additional information (entities, sentiment) is added to enrich the data. A convenient interactive dashboard is provided for users to work with the created tooling.
 
 We make use of two models from the Hugging Face library:
@@ -45,27 +67,6 @@ An important next step is to also determine the credibility of the evidence sour
 
 Finally, some additional information is extracted from the claim, such as entities and emotion. This is added to provide users with quick insights about the content of a claim.
 
-The result of our model pipeline is stored in ElasticSearch and visualized in the dashboard.
-
-![](/docs/dashboard_es.png)
-
-## Architecture
-
-### Overall architecture
-![](/docs/overall_architecture.png)
-
-The application architecture consists of several components that work together to provide a powerful and scalable solution. The frontend is built using Angular, a popular and widely used framework for building web applications. The frontend is responsible for displaying the data and providing an intuitive user interface for interacting with the application.
-
-The backend is implemented using a REST API conforming to the Open API Specification. This API is responsible for receiving requests from the frontend and other external systems, as well as triggering the Python AI Pipeline with the provided claim or Twitter message. The AI Pipeline uses Python to perform the necessary natural language processing tasks and produce the desired results. The results are then stored in ElasticSearch, a distributed search and analytics engine that provides a scalable and flexible datastore for the application.
-
-By utilizing a REST API, the application is highly interoperable and can be easily integrated with other systems. This allows for easy integration with external data sources or other applications that may need to interact with the data stored in ElasticSearch and the AI Pipeline.
-
-Overall, the application architecture is designed to be highly scalable and provide a reliable and flexible solution for processing and analyzing large amounts of natural language data.
-
-### Activity Diagram
-![](/docs/activity_diagram.png)
-Credibility activity diagram
-
 ### Open API Specification for Interoperability
 ![](/docs/open_api.png)
 The backend is implemented using a REST API conforming to the Open API Specification for maximum interoperability.
@@ -77,7 +78,6 @@ This is a response object from the service analyse (REST API) which can be easil
 ### Programming Languages
 - Python
 - Angular
-
 
 ### Software / frameworks
 - Hugging Face
