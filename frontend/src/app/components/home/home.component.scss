@@ -17,12 +17,13 @@
   height: 0px;
   width: 90%;
   margin: 0 auto;
-//   justify-content: space-between;
   align-items: center;
+  transform: scale(1.5);
 }
 
 .left {
     align-items: start;
+    margin-top: 65px
 }
 
 .loader-item {
@@ -62,4 +63,25 @@
 .submit-button {
   margin: 16px;
   margin-top: 0px;
+}
+
+.result-button {
+  margin-left: 30px;
+  background-color: green;
+}
+
+.score {
+  font-weight: bold;
+}
+.true {
+  color: green;
+}
+.false {
+  color: red;
+}
+.neutral {
+  color: gray;
+}
+.opinion {
+  color: gray;
 }
