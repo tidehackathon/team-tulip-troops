@@ -16,26 +16,31 @@ def summarize_text(text, max_len=128):
     
     # truncate input somewhat (due to model max length)
     # TODO split context into chunks of max len, concat later?
-    done = False
+    successful = False
     trunc_len = 700
-    while (not done) and (trunc_len > 300):
+    summ_text_key = 'summary_text'
+    while (not successful) and (trunc_len >= 300):
         try:
             text = truncate_text(text, trunc_len)
             summarized_text = summarizer(text, min_length=min(10, len(text)), max_length=max_len)
-            done = True
+            successful = True
         except:
             trunc_len -= 100
+
+    if not successful:
+        print('Unable to summarize, returning raw text.')
+        return text
 
     if type(text) != str:
         result = []
         for i, txt in enumerate(summarized_text):
-            if len(txt['summary_text']) > len(text[i]):
+            if len(txt[summ_text_key]) > len(text[i]):
                 result.append(text[i])
             else:
-                result.append(txt['summary_text'])
+                result.append(txt[summ_text_key])
         return result
     else:
-        summary = summarized_text[0]['summary_text']
+        summary = summarized_text[0][summ_text_key]
         if len(summary) > len(text):
             return text
         else:

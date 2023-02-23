@@ -20,13 +20,16 @@ GOOGLE_CSE_ID = os.getenv('GOOGLE_CSE_ID')
 google_service = build("customsearch", "v1", developerKey=GOOGLE_API_KEY)
 
 def get_top_k_results_from_google(text, k):
-    res = google_service.cse().list(q=text, cx=GOOGLE_CSE_ID, num=min(10, k)).execute()
+    res = google_service.cse().list(q=text, cx=GOOGLE_CSE_ID, num=min(10, k), filter=1).execute()
+    if 'spelling' in res.keys():
+        res = google_service.cse().list(q=res['spelling']['correctedQuery'], cx=GOOGLE_CSE_ID, num=min(10, k), filter=1).execute()
     if 'items' in res.keys():
         res = [r['link'] for r in res['items'] if (
             '.pdf' not in r['link'] and 
             'twitter.com' not in r['link'] and 
             'facebook.com' not in r['link'] and 
-            'youtube' not in r['link']
+            'youtube' not in r['link'] and
+            '.txt' not in r['link']
         )]
         return res[:k]
     else:

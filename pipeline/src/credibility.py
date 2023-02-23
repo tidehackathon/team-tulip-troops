@@ -61,12 +61,15 @@ def investigate_claim(claim, datasource="google", model_type="zero-shot", num_re
     res, claim_or_opinion_score = claim_or_opinion(claim)
 
     if res != 'opinion' or not filter_opinions:
+        claim = clean_input(claim)
+
          # summarize claim if needed
         if len(claim.split(' ')) > 50:
             print('Summarizing claim for further processing.')
             claim = summarization.summarize_text(claim, max_len=50)
 
         evidences = collect_evidences(claim, datasource=datasource, num_results=num_results)
+
         if len(evidences)==0:
             return {
                 'claim_or_opinion_score': claim_or_opinion_score,
@@ -184,7 +187,7 @@ def fetch_evidences_elastic(claim, num_results=10):
         text = (hit["_source"]['headlines'] + "\n\n" + hit["_source"]['articles']).strip()
         return {
             'source': news_paper + " - " + hit["_source"]['published'] + " - " + hit["_source"]['headlines'],
-            'text': text.replace("\n"," ").strip(),
+            'text': clean_input(text),
             'texthash': hashlib.md5(text.encode()).hexdigest()
         }
     evidences = list(map(build_evidence, hits))
@@ -291,8 +294,20 @@ def clean_tweet(input_dict):
 
 def clean_input(text):
     # Remove newline
-    text = text.replace('\n', ' ')
-    return text
+    text = text.replace('\n', ' ').lower()
+
+    # Remove urls, hashtags and user mentions
+    text = re.sub(r'\s\#\S+', ' ', f' {text} ')
+    text = re.sub(r'\s\@\S+', ' ', f' {text} ')
+    text = re.sub(r'''(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))''', '', text)
+    
+    # Final strip
+    text = ' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+)"," ",text).split())
+
+    # Remove unicode
+    text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode()
+
+    return text.strip().title()
 
 def split_to_sentences(text):
     return nltk.tokenize.sent_tokenize(text, language='english')
