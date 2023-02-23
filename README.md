@@ -1,7 +1,7 @@
 # The Tulip Troops
 
 ## Todo Documentation
-- [ ] How to get this repo running
+- [X] How to get this repo running
 - [x] Add screenshot `credible source`/`uncredible source`
 - [x] Explain why ElasticSearch
 - [ ] Explain why Google Search API is needed
@@ -9,7 +9,8 @@
 - [ ] Explain why which HuggingFace model
 - [ ] Team Stories
 - [x] Additional Information
-- [ ] Activity Diagram voorzien van filmpje
+- [ ] Activity Diagram voorzien extra description
+- [ ] Filmpje toevoegen
 
 
 ## Team description
