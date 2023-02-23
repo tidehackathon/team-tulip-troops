@@ -32,5 +32,9 @@ export class AppComponent {
     this.router.navigateByUrl('/');
   }
 
+  dashboard(): void {
+    this.router.navigateByUrl('/kibana');
+  }
+
 
 }
