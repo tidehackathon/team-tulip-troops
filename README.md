@@ -132,9 +132,6 @@ Scalability: Elasticsearch is highly scalable and can handle large amounts of da
 
 Open-source: Both Elasticsearch and Kibana are open-source tools, which means they are free to use and can be easily customized to suit specific needs.
 
-## Team Stories
-TODO
-
 ## Additional information
 How to install this repo: [INSTALL.md](/INSTALL.md)
 
