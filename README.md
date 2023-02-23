@@ -12,7 +12,7 @@
 
 
 ## Team description
-Team "Tulip Troops" has four participants and one (non-participating) team lead from the Joint IT Command under the Defence Materiel Organization (DMO) of the Netherlands. The team is part of a large IT-innovation department (KIXS) of the Dutch DoD, and comprises two data scientists and two data engineers.
+Team "Tulip Troops" has four participants and one (non-participating) team lead from the Joint IT Command under the Defence Materiel Organization (DMO) of the Netherlands. The team is part of a large IT-innovation department (KIXS) of the Dutch MoD, and comprises two data scientists and two data engineers.
 
 Team members: 
 - Daan Gommers
@@ -21,29 +21,27 @@ Team members:
 - Rik Kleine
 
 ## Results
-Classifying content as misinformation is very important to counter the online onslaught of fake news working to undermine the healthy functioning of democracies. Several approaches have been proposed, such as classifying the text based on writing style, or using graph-based methods to determine fake content based on the spread through social media. We propose a more evidence-based method. Looking beyond the recent hype of ChatGPT, it has become apparent that Large Language Models (LLM) are capable of amazing feats. Many trivial human tasks such as comparing text are now also possible using AI. Therefore, we decided to further explore this technology for its ability to verify any given claim for its credibility, based on objective textual evidence.
+Classifying content as disinformation is very important to counter the online onslaught of fake news working to undermine the healthy functioning of democracies. Several approaches have been proposed, such as classifying the text based on writing style, or using graph-based methods to determine fake content based on the spread through social media. We propose a more evidence-based method. Looking beyond the recent hype of ChatGPT, it has become apparent that Large Language Models (LLM) are capable of amazing feats. Many trivial human tasks such as comparing text are now also possible using AI. Therefore, we decided to further explore this technology for its ability to verify any given claim for its credibility, based on objective textual evidence.
 
-More specifically, our solution leverages the power of LLMs to verify a claim based on evidence from open (internet) sources or an on-premise knowledge base. Using AI at every step, the first check whethers a text contains a claim, then compares the claim to search query results, determines the source credibility, and finally returns a weighted credibility score. Moreover, additional information (entities, sentiment) is added to enrich the data. A convenient interactive dashboard is provided for users to work with the created tooling.
+More specifically, our solution leverages the power of LLMs to verify a claim based on evidence from open (internet) sources or an on-premise knowledge base. Using AI at every step, the first step checks whether a text contains a claim, then compares the claim to search query results, determines the source credibility, and finally returns a weighted credibility score. Moreover, additional information (entities, sentiment) is added to enrich the data. A convenient interactive dashboard is provided for users to work with the created tooling.
 
 We make use of two models from the Hugging Face library:
 - For claim/opinion classification, claim verification and source credibility: `MoritzLaurer/DeBERTa-v3-large-mnli-fever-anli-ling-wanli`
 - For summarization: `sshleifer/distilbart-cnn-12-6`
 
-Using tweets as examples, an immediate problem that arises is the fact that most tweets do not actually contain fake news, or any claim for that matter. To determine this, we use a zero-shot approach, defined by Hugging Face as follows: "Zero Shot Classification is the task of predicting a class that wasn't seen by the model during training. This method, which leverages a pre-trained language model, can be thought of as an instance of transfer learning which generally refers to using a model trained for one task in a different application than what it was originally trained for. This is particularly useful for situations where the amount of labeled data is small." With this method, we apply the DeBERTa model to classify whether an input text contains an opinion or a claim. If it is an opinion, we deem it as not relevant, since it does not attempt to spread factual misinformation. If a claim is detected, however, our analysis continues. Our custom labels for this classification are: `['claim', 'opinion']`.
+Using tweets as examples, an immediate problem that arises is the fact that most tweets do not actually contain fake news, or any claim for that matter. To determine this, we use a zero-shot approach, defined by Hugging Face as follows: "Zero Shot Classification is the task of predicting a class that wasn't seen by the model during training. This method, which leverages a pre-trained language model, can be thought of as an instance of transfer learning which generally refers to using a model trained for one task in a different application than what it was originally trained for. This is particularly useful for situations where the amount of labeled data is small." With this method, we apply the DeBERTa model to classify whether an input text contains an opinion or a claim. If it is an opinion, we deem it as not relevant, since it does not attempt to spread factual misinformation. If a claim is detected however, our analysis continues. Our custom labels for this classification are: `['claim', 'opinion']`.
 
 ![](/docs/claim_opinion.png)
 
 Using the summarization model, we summarize the claim to make sure it does not exceed 50 words. The claim is then used to query Google or ElasticSearch. The first approach relies on open-source internet data, while the second approach allows the user to limit the knowledge base on proprietary data. For the demo, we include the provided Guardian and New York Times articles in ElasticSearch. This could also be applied to NATO information sources. Note that this approach is only reliable up to the latest date that the knowledge base was updated. Searching Google will give the most recent results available.
 
-After collecting the evidence, it is compared with the claim to judge whether it supports or contradicats the claim. For this, we first summarize each piece of evidence, and input it into the DeBERTa model. Our custom labels for this classification are roughly formatted like this: `['<claim> is true', 'not enough information', '<claim> is false']`. If the claim is not supported by the given piece of evidence, the result will be False. Of course, it can be the case that no relevant evidence is found, but only the next best results. Therefore, if the evidence provides no relevant information to verify the claim, the result will be Neutral. If the claim is obviously True, many relevant sources will be returned, and the model will judge the claim as True.
+After collecting the evidence, it is compared with the claim to judge whether it supports or contradicts the claim. For this, we first summarize each piece of evidence, and input it into the DeBERTa model. Our custom labels for this classification are roughly formatted like this: `['<claim> is true', 'not enough information', '<claim> is false']`. If the claim is not supported by the given piece of evidence, the result will be False. Of course, it can be the case that no relevant evidence is found, but only the next best results. Therefore, if the evidence provides no relevant information to verify the claim, the result will be Neutral. If the claim is obviously True, many relevant sources will be returned, and the model will judge the claim as True.
 
 ![](/docs/true_false.png)
 
 An important next step is to also determine the credibility of the evidence sources. If a claim is deemed True based on fake news media, this would of course undermine the outcome completely. Having considered white/blacklist methods, we eventually ended up also applying the LLM to this problem, using a zero-shot task defined as `['credible source', 'uncredible source']`. This model is applied to the domain name of the source URL, e.g. 'bbc' or 'infowars'. If a source is uncredible, and states that a claim is True, our model actually reverses the conclusion and gives a negative score.
 
 ![](/docs/source.png)
-
-TODO screenshot van resultaat
 
 Finally, some additional information is extracted from the claim, such as entities and emotion. This is added to provide users with quick insights about the content of a claim.
 
@@ -102,7 +100,7 @@ Angular has the following characteristics:
 Angular is pure a user interface, the REST API we built makes sure the DISInformation Analyzer is interoperable with other information systems.
 
 #### Hugging Face
-During our search for a suitable model we investigated different leads. GNNs, or Graph Neural Networks, are often used for this topic (e.g. [Dou et al. 2021](https://github.com/safe-graph/GNN-FakeNews)), and therefor tried by the team. However, due to the lack of Twitter user data (like who is following who) in the provided datasets, and privacy concerns in scraping this data ourselves, we were not able to build the needed user/tweet graphs. Therefore we have chosen to go with Large Language Models and only work with the content of a tweet. This makes our solution also somewhat more generic. Not only tweets, but any claim or statement can be investigated.
+During our search for a suitable model we investigated different leads. GNNs, or Graph Neural Networks, are often used for this topic (e.g. [Dou et al. 2021](https://github.com/safe-graph/GNN-FakeNews)), and therefore tried by the team. However, due to the lack of Twitter user data (like who is following who) in the provided datasets, and privacy concerns in scraping this data ourselves, we were not able to build the needed user/tweet graphs. Therefore we have chosen to go with Large Language Models and only work with the content of a tweet. This makes our solution also somewhat more generic. Not only tweets, but any claim or statement can be investigated.
 
 #### FAST API
 FastAPI is used to create REST API's considering the OpenAPI specifications in order to encourage interoperability.
@@ -140,7 +138,33 @@ TODO
 
 ### How to get this repo running
 1. Fetch the Google API-keys as mentioned below
-2. TODO
+2. Create a virtual environment:
+```
+$ python3 -m venv venv
+```
+3. Activate the virtual environment:
+```
+$ pip install -r requirements.txt
+```
+4. Run FastAPI server for development
+```
+$ uvicorn app.main:app --host localhost --port 8000 --reload
+```
+5. Install nodejs version 14 or higher
+6. Install the Angular CLI version 15 or higher:
+```
+$ npm install -g @angular/cli
+```
+7. Navigate to the `frontend` folder
+8. Install the Node modules
+```
+$ npm install
+```
+9. Serve the frontend
+```
+$ ng serve
+```
+10. Go to http://localhost:4200
 
 ### How to get the Google API-keys
 ([Source](https://mixedanalytics.com/knowledge-base/import-google-serp-data-to-google-sheets/))
@@ -159,6 +183,35 @@ GOOGLE_API_KEY=<YOUR_API_KEY>
 GOOGLE_CSE_ID=<YOUR_SEARCH_ENGINE_ID>
 ```
 
+### How to start with ElasticSearch/Kibana?
+1. Start the Free Trial (14 days) on https://www.elastic.co/
+2. Login
+3. Go to Integrations -> Python
+4. Right corner click "View deployment details"
+5. Copy Cloud ID and Create API key (replace those in .env)
+6. Go to Stack Management -> Saved Objects -> Import "kibana_export_dashboard.ndjson" 
+7. Start the FAST API and Angular Frontend
+
+### List of Acronyms
+
+- **DMO** Defense Material Organisation (NLD MoD)
+- **GNN** Graph Neural Networks
+- **JIVC** Joint IT Command (NLD MoD/DMO)
+- **KIXS** Knowledge Innovation eXperimentation & Simulation (NLD MoD/JIVC)
+- **LLM** Large Language Model (type of Neural Network; e.g. ChatGPT)
+
+### Terms & Definitions
+- **Angular** A popular and widely used framework for building web applications
+- **API** Application Programming Interface, a set of definitions, protocols and procedures for interacting with a piece of software from any other script/software.
+- **ChatGPT** An application developped by OpenAI. Essentially a chat-box with a (very) Large Language Model on the other side.
+- **DeBERTa** An improved version of BERT, a Large Language Model. BERT was developped by Google, DeBERTa by Microsoft.
+- **ElasticSearch** Elasticsearch is a database optimized for searching large volumes of text data in real-time.
+- **FAST API** A modern, fast (high-performance), web framework for building APIs according to the OpenAPI specifications.
+- **Hugging Face** A repository of pre-trained machine learning models of all kinds.
+- **OpenAPI Specification** A standard that defines a way to build APIs which allows both humans and computers to discover and understand the capabilities of the service without access to source code or documentation.
+- **Python** A popular general purpose programming language
+- **REST API** A web based API that returns its result after a HTTP request was made.
+- **Zero-shot Classification** The task of predicting a class of a given sample of text, where the the class was not seen by the model during training. Usualy achieved using LLMs.
 
 
 # Links
