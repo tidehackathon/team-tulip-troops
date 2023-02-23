@@ -58,10 +58,10 @@ def investigate_claim(claim, datasource="google", model_type="zero-shot", num_re
     """Investigates the claim based on evidence collected"""
 
     # Determine if claim or opinion
-    res, claim_or_opinion_score = claim_or_opinion(claim)
+    res, claim_or_opinion_score = claim_or_opinion(clean_input(claim, claim=True))
 
     if res != 'opinion' or not filter_opinions:
-        claim = clean_input(claim)
+        claim = clean_input(claim, claim=True)
 
          # summarize claim if needed
         if len(claim.split(' ')) > 50:
@@ -220,8 +220,13 @@ def claim_or_opinion(text):
     if zero_shot_model is None:
         zero_shot_model = initialize_zero_shot()
 
-    res = zero_shot_model(text, ['statement', 'claim', 'opinion'])
-    return res['labels'][0], res['scores'][0]
+    # labels = ['statement', 'claim', 'opinion']
+    labels = ['contains claim', 'purely opinion']
+
+    res = zero_shot_model(text, labels)
+    conclusion = 'claim' if 'claim' in res['labels'][0] else 'opinion'
+
+    return conclusion, res['scores'][0]
 
 def check_nation_affiliation(text, nation):
     global zero_shot_model
@@ -252,6 +257,7 @@ def run_zero_shot_model(evidence_dict, claim, unsure_threshold=0.4):
         zeroshot_labels = [f"The following statement is True: {claim}",
                         f"Not enough information to verify the following statement: {claim}",
                         f"The following statement is False: {claim}"]
+
         conclusion = zero_shot_model(evidence_dict['text_input'], candidate_labels=zeroshot_labels)
         parsed_conclusion = conclusion['labels'][0].split(' ')[4].lower().replace(':', '')
 
@@ -292,17 +298,18 @@ def clean_tweet(input_dict):
     input_dict['cleanRenderedContent'] = tweetcontent.replace("\n\n","").replace("\n",". ")
     return input_dict
 
-def clean_input(text):
+def clean_input(text, claim=False):
     # Remove newline
     text = text.replace('\n', ' ').lower()
 
     # Remove urls, hashtags and user mentions
     text = re.sub(r'\s\#\S+', ' ', f' {text} ')
     text = re.sub(r'\s\@\S+', ' ', f' {text} ')
-    text = re.sub(r'''(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))''', '', text)
-    
-    # Final strip
-    text = ' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+)"," ",text).split())
+
+    if claim:
+        text = re.sub(r'''(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))''', '', text)
+    else:
+        text = re.sub(r'http\S+', '', text)
 
     # Remove unicode
     text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode()
