@@ -2,11 +2,10 @@
 
 ## Todo Documentation
 - [ ] How to get this repo running
-- [ ] Add screenshot `credible source`/`uncredible source`
-- [ ] Add screenshot affiliation of country
-- [ ] Explain why ElasticSearch
+- [x] Add screenshot `credible source`/`uncredible source`
+- [x] Explain why ElasticSearch
 - [ ] Explain why Google Search API is needed
-- [ ] Explain why Angular
+- [x] Explain why Angular
 - [ ] Explain why which HuggingFace model
 - [ ] Team Stories
 - [ ] Additional Information
@@ -44,8 +43,6 @@ An important next step is to also determine the credibility of the evidence sour
 
 ![](/docs/source.png)
 
-Additionally, a possible feature worth mentioning is assessing the country affiliation of a source. Although this is not included in the analysis pipeline, experiments with this concept have yielded impresive results. An example would be assessing whether a source is affiliated with a hostile nation, and changing the credibility score accordingly.
-
 TODO screenshot van resultaat
 
 Finally, some additional information is extracted from the claim, such as entities and emotion. This is added to provide users with quick insights about the content of a claim.
@@ -81,7 +78,8 @@ This is a response object from the service analyse (REST API) which can be easil
 
 ### Programming Languages
 - Python
-- Web (Angular)
+- Angular
+
 
 ### Software / frameworks
 - Hugging Face
@@ -89,11 +87,51 @@ This is a response object from the service analyse (REST API) which can be easil
 - ElasticSearch
 
 ### Explanation
+
+#### Python
 We prefer Python for its rich availability of open source data science libraries. Hugging Face is a very useful repository containing many powerful (large) language models. These pretrained models proved very applicable to the given challenges.
 
+#### Angular
+Angular is a popular opensource JavaScript framework that is used for building modern, scalable, and high-performance web applications. 
+Angular has the following characteristics:
+    - Component-based architecture
+    - Enhanced performance
+    - Strong community support
+    - Improved developer productivity
+    - Cross-platform development
+Angular is pure a user interface, the REST API we built makes sure the DISInformation Analyzer is interoperable with other information systems.
+
+#### Hugging Face
 During our search for a suitable model we investigated different leads. GNNs, or Graph Neural Networks, are often used for this topic (e.g. [Dou et al. 2021](https://github.com/safe-graph/GNN-FakeNews)), and therefor tried by the team. However, due to the lack of Twitter user data (like who is following who) in the provided datasets, and privacy concerns in scraping this data ourselves, we were not able to build the needed user/tweet graphs. Therefore we have chosen to go with Large Language Models and only work with the content of a tweet. This makes our solution also somewhat more generic. Not only tweets, but any claim or statement can be investigated.
 
-We use ElasticSearch to enable a custom knowledge base to search from, as well as saving the model output. FastAPI is used according to OpenAPI specifications in order to encourage interoperability. 
+#### FAST API
+FastAPI is used to create REST API's considering the OpenAPI specifications in order to encourage interoperability.
+Which means that every information systems is able to integrate with the DISInformation Analyser.
+
+Fast: FastAPI is built on top of Starlette, an ASGI (Asynchronous Server Gateway Interface) framework that makes use of asynchronous programming techniques to provide high performance and concurrency.
+
+Easy to use: FastAPI is designed to be easy to use and intuitive, with a minimalistic API that is easy to learn and use, making it an excellent choice for both beginners and experienced developers.
+
+Easy to deploy: FastAPI can be easily deployed on a variety of platforms based on a docker container.
+
+Automatic API documentation: FastAPI generates interactive API documentation automatically, based on the code you write and the type hints you use, which can save a lot of time and effort.
+
+Data validation: FastAPI provides automatic data validation and serialization, so you can ensure that the data you receive and send is always valid and well-formed. 
+
+Secure: FastAPI embraces security best practices.
+
+#### ElasticSearch and Kibana
+We use ElasticSearch to enable a custom knowledge base to search from, as well as saving the model output. 
+
+Efficient search capabilities: Elasticsearch is optimized for searching large volumes of data in real-time. By combining it with Kibana, users can easily visualize the results of their searches and gain valuable insights into their data.
+
+Data visualization: Kibana provides a powerful platform for creating visualizations, dashboards, and reports from data stored in Elasticsearch. This makes it easy for users to quickly identify patterns, trends, and anomalies in their data. 
+
+Centralized data store: Elasticsearch provides a centralized data store for storing and indexing data from multiple sources. Kibana makes it easy to search and analyze data stored in Elasticsearch, regardless of its format or source.
+
+Scalability: Elasticsearch is highly scalable and can handle large amounts of data. By combining it with Kibana, users can easily scale their data visualization and analytics capabilities as their needs grow.
+
+Open-source: Both Elasticsearch and Kibana are open-source tools, which means they are free to use and can be easily customized to suit specific needs.
 
 ## Team Stories
 TODO
