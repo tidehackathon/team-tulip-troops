@@ -41,6 +41,15 @@
                     diameter="16" color="accent" *ngIf="!job8done && job8"></mat-spinner> <mat-icon *ngIf="job8done"
                     class="checkbox">check_box</mat-icon>
             </div>
+            <div class="loader-item not-done" [class.not-done]="!resultReceived">
+                <button mat-flat-button class="result-button" [disabled]="!resultReceived" (click)="toToDetails()">VIEW DETAILS</button>
+            </div>
+            <div class="loader-item">
+                <span *ngIf="allDone" class="score" [class.false]="credibility_label === 'Contradicted'"
+                      [class.true]="credibility_label === 'Verified'"
+                      [class.neutral]="credibility_label === 'Undecided'"
+                      [class.opinion]="credibility_label === 'Opinion'">{{ credibility_label }}</span>
+            </div>
         </div>
     </div>
     <mat-progress-bar mode="determinate" [value]="loaderValue" color="accent"></mat-progress-bar>
@@ -50,22 +59,22 @@
     <div class="input-container">
         <mat-card class="article-card">
             <mat-card-header>
-                <mat-card-title>Analyse</mat-card-title>
+                <mat-card-title>Claim</mat-card-title>
             </mat-card-header>
             <mat-card-content>
                 <form class="form">
                     <mat-form-field class="input">
-                        <mat-label>Enter URL, #Hashtag, @Username or Tweet.</mat-label>
+                        <mat-label>Enter claim</mat-label>
                         <textarea matInput [formControl]="articalFormControl" rows="10"></textarea>
                         <mat-error *ngIf="articalFormControl.hasError('required')">
-                            Input is <strong>required</strong>
+                            Claim is <strong>required</strong>
                         </mat-error>
                     </mat-form-field>
                 </form>
             </mat-card-content>
             <mat-card-actions align="end">
-                <button mat-flat-button type="submit" color="accent" class="submit-button"
-                    (click)="onSubmit()">Analyse</button>
+                <button mat-flat-button type="submit" color="accent" class="submit-button" (click)="onSubmit()">CHECK
+                    CLAIM</button>
             </mat-card-actions>
         </mat-card>
     </div>

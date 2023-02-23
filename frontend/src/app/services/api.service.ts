@@ -10,8 +10,6 @@ export class ApiService {
 
   baseUrl: string = environment.apiUrl;
 
-  
-
   constructor(
     private http: HttpClient
   ) { }

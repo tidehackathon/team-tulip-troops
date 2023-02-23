@@ -1,9 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { ApiService } from 'src/app/services/api.service';
 import { StateService } from 'src/app/services/state.service';
 import { trigger, transition, animate, style } from '@angular/animations'
-import { interval } from 'rxjs';
+import { interval, Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 
 @Component({
@@ -31,11 +31,13 @@ import { Router } from '@angular/router';
     ]),
   ]
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit {
   articalFormControl = new FormControl('', Validators.required);
   isLoading: boolean = false;
   loaderValue: number = 0;
   int = interval(100);
+  intervalSubscription: Subscription = new Subscription;
+  credibility_label: string = '';
 
   job1: boolean = true;
   job2: boolean = false;
@@ -55,67 +57,80 @@ export class HomeComponent {
   job7done: boolean = false;
   job8done: boolean = false;
 
+  allDone: boolean = false;
+  resultReceived: boolean = false;
+
   constructor(
     private api: ApiService,
-    private state: StateService,
     private router: Router
   ) {}
 
+  ngOnInit(): void {
+    this.reset();
+  }
+
   onSubmit(): void {
-    this.isLoading = !this.isLoading;
     this.startLoader();
     if (this.articalFormControl.valid) {
       this.api.analyseArticle(this.articalFormControl.value as string).subscribe(result => {
         console.log(result);
-        this.isLoading = !this.isLoading;
-        // navigate to result page
-
+        this.resultReceived = true;
+        this.credibility_label = `${result.credibility.credibility_label} (${String(result.credibility.credibility_score)})`;
+        this.loaderValue = this.loaderValue + 25;
       });
     }
   }
 
   startLoader(): void {
-    const subscription = this.int.subscribe(() => {
+    this.isLoading = true;
+    this.intervalSubscription = this.int.subscribe(() => {
       this.loaderValue = this.loaderValue + 0.1;
-      if (this.loaderValue > 12.5) {
+      if (this.loaderValue > 5) {
         this.job1done = true;
         this.job2 = true;
       }
-      if (this.loaderValue > 25) {
+      if (this.loaderValue > 10) {
         this.job2done = true;
         this.job3 = true;
       }
-      if (this.loaderValue > 37.7) {
+      if (this.loaderValue > 15) {
         this.job3done = true;
         this.job4 = true;
       }
-      if (this.loaderValue > 50) {
+      if (this.loaderValue > 20) {
         this.job4done = true;
         this.job5 = true;
       }
-      if (this.loaderValue > 62.5) {
+      if (this.loaderValue > 40) {
         this.job5done = true;
         this.job6 = true;
       }
-      if (this.loaderValue > 75) {
+      if (this.loaderValue > 70) {
         this.job6done = true;
         this.job7 = true;
       }
-      if (this.loaderValue > 87.5) {
+      if (this.loaderValue > 90) {
         this.job7done = true;
         this.job8 = true;
       }
       if (this.loaderValue > 100) {
         this.job8done = true;
-        this.resetLoader();
-        subscription.unsubscribe();
-        this.isLoading = !this.isLoading;
-        // this.router.navigateByUrl('/result');
+      }
+      if (this.loaderValue > 100 && this.resultReceived) {
+        this.allDone = true;
       }
     });
   }
+
+  toToDetails(): void {
+    this.router.navigateByUrl('/kibana');
+  }
   
-  resetLoader(): void {
+  reset(): void {
+    this.intervalSubscription.unsubscribe();
+    this.articalFormControl.reset();
     this.loaderValue = 0;
+    this.isLoading = false;
+    this.resultReceived = false;
   }
 }
